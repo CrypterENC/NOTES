@@ -26,4 +26,4 @@ Priority: u=0
 
 ```
 
-### IDOR in `vault/edit` path [].
+### IDOR in `vault/edit` path [http://localhost/vault/edit/item_id].
