@@ -4,3 +4,5 @@ for endpoint in /api/users /api/passwords /api/admin /api/profile /api/settings 
   curl -s -I http://10.0.0.10$endpoint | head -1
 done
 ```
+
+-  
