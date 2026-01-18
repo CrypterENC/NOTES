@@ -32,8 +32,8 @@ Attackers can modify, corrupt, or delete other users' stored credentials. This a
 - Access to curl or Burp Suite
 
 ### Accounts Used:
-- **Attacker Account:** testuser1 (authenticated)
-- **Target Account:** Any other user's vault items
+- **Attacker Account :** testuser1 (authenticated)
+- **Target Account :** testuser2 Any other user's vault items
 
 ### Step 1: Identify Target Vault Item IDs
 
