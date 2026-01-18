@@ -124,8 +124,8 @@ curl http://10.0.0.10 | grep -i "version\|v[0-9]"
 #### Specific Vulnerabilities to Test (25-point targets in bold)
 
 **High Priority (25 points):**
-- [ ] **Broken Authentication** - Brute force protection (already tested - weak rate limiting found)
-- [ ] **SQL Injection** - Registration username field
+- [x] **Broken Authentication** - Brute force protection (already tested - weak rate limiting found)
+- [x] **SQL Injection** - Registration username field (FOUND - 25 points)
 - [ ] **SQL Injection** - Login username field
 - [ ] **Stored XSS** - Registration fields
 - [ ] **Broken Authentication** - Account enumeration
@@ -133,7 +133,7 @@ curl http://10.0.0.10 | grep -i "version\|v[0-9]"
 - [ ] **Broken Authentication** - Default credentials
 
 **Medium Priority (reportable):**
-- [ ] Lack of Rate Limiting (already tested - 50 requests allowed)
+- [x] Lack of Rate Limiting (already tested - 50 requests allowed)
 - [ ] Session management issues (predictable tokens, long timeout)
 - [ ] Password reset vulnerabilities
 - [ ] Account lockout bypass
