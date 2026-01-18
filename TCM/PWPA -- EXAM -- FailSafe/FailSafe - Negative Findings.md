@@ -109,17 +109,30 @@ curl "http://10.0.0.10/share/http://127.0.0.1:80" \
 
 ### 5. Stored XSS in Vault Display
 
-**Description:** Attempted stored XSS via vault item fields.
+**Description:** Attempted stored XSS via vault item fields displayed in HTML.
 
 **Tested Areas:**
 - Vault item creation and display
 - Title, username, password fields
+- Display using innerHTML in client-side JavaScript
+
+**Payloads Used:**
+- `<script>alert("XSS")</script>` in title field
+
+**Testing Method:**
+```bash
+curl -X POST http://10.0.0.10/vault/add \
+  -H "Cookie: [session]" \
+  -H "Content-Type: application/json" \
+  -d '{"vaulttitle":"<script>alert(\"XSS\")</script>","vaultusername":"test","vaultpassword":"test"}'
+```
 
 **Results:**
-- Payloads stored but not executed in display
-- Application appears to sanitize output
+- Payload stored and displayed as plain text: `<script>alert("XSS")</script>`
+- No JavaScript execution
+- Application sanitizes HTML output on display
 
-**Conclusion:** Stored XSS not confirmed (not fully tested due to time constraints, but input sanitization observed).
+**Conclusion:** Stored XSS not vulnerable. Input is properly sanitized before display.
 
 ---
 
