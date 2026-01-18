@@ -7,3 +7,4 @@
 {"message":"Login successful.","success":true}                                                                                          
 ```
 
+1.  Test Brute Force on Login page.
