@@ -6,6 +6,6 @@
 Target user's :  user:pass --> test' OR '1'='1:Password123!
 
 Attacker user's   :  user:pass --> testuser1:Password123!
-Cookie: connect.sid=s%3Amx3I15HmECS7_I8H0_Db0MCR8L1jLMZW.%2Fvpjd%2BtleNRZyg3M4pJrRsgwRNuSLEXQBg7sdCo93ZU
+Cookie: connect.sid=s%3Ae3Eb2t-3HGOrpeXqxjmYmGprfLarVIXR.I0pzkyMIRP7STivrqi3tQqcxH1pQlOEoVCfg9q%2B7q88
 
 ```
