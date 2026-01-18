@@ -26,4 +26,5 @@ Priority: u=0
 
 {"username":"testuser1","password":"test"}
 ```
-- Wordlist used : 
+- Wordlist used : `xato-net-10-million-passwords-100.txt` from seclist.
+- 
