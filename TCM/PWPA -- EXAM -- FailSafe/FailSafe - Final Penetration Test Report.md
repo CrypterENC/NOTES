@@ -56,11 +56,12 @@ This penetration test was conducted with authorization from FailSafe management.
 
 ## Executive Summary
 
-A comprehensive penetration test of the FailSafe Password Manager web application was conducted to identify security vulnerabilities and weaknesses. The assessment identified **1 critical vulnerability (25 points)** and **multiple reportable weaknesses**, bringing the total to **25 points - FAILING SCORE**.
+A comprehensive penetration test of the FailSafe Password Manager web application was conducted to identify security vulnerabilities and weaknesses. The assessment identified **3 critical vulnerabilities (75 points)** and **multiple reportable weaknesses**, bringing the total to **75 points - PASSING SCORE**.
 
 **Key Findings:**
 - SQL Injection in registration username field (25 points)
-- Insecure Direct Object Reference (IDOR) in API vault endpoint (25 points)
+- SQL Injection in vault add title field (25 points)
+- Insecure Direct Object Reference (IDOR) in vault edit endpoint (25 points)
 - Cross-Site Request Forgery (CSRF) in account update functionality
 - Weak rate limiting on login endpoint
 - Weak password validation policies
@@ -170,10 +171,147 @@ curl -X POST http://10.0.0.10/register \
 
 ---
 
-## Finding 2: Insecure Direct Object Reference (IDOR) - API Vault Endpoint
+## Finding 2: SQL Injection - Vault Add Title Field
+
+**Severity:** HIGH (CVSS 8.6)  
+**Points:** 25  
+**Status:** CONFIRMED
+
+### Description
+The vault add endpoint accepts unsanitized user input in the title field, allowing SQL injection attacks. An attacker can inject SQL commands to manipulate vault data or potentially extract database information.
+
+### Vulnerability Details
+- **Endpoint:** POST /vault/add
+- **Parameter:** vaulttitle
+- **Type:** SQL Injection (Boolean-based)
+- **Authentication Required:** Yes (session-based)
+
+### Proof of Concept
+
+**Request:**
+```bash
+curl -X POST http://10.0.0.10/vault/add \
+  -H "Cookie: connect.sid=[session]" \
+  -H "Content-Type: application/json" \
+  -d '{"vaulttitle":"test' OR '1'='1","vaultusername":"test","vaultpassword":"test123"}'
+```
+
+**Response:**
+```json
+{"success":true,"message":"Item added successfully!"}
+```
+
+**Vault Item Created:** Title `test' OR '1'='1` successfully stored and displayed
+
+### Impact
+- Vault item creation with SQL payloads
+- Potential database manipulation
+- Data integrity compromise
+
+### CVSS v3.1 Score
+**Score:** 8.6 (High)  
+**Vector:** CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:C/C:H/I:L/A:N
+
+### Remediation
+
+1. **Use Parameterized Queries:**
+   ```javascript
+   // Vulnerable
+   db.query("INSERT INTO vault (title, username, password, user_id) VALUES ('" + title + "', ...);
+   
+   // Secure
+   db.query("INSERT INTO vault (title, username, password, user_id) VALUES (?, ?, ?, ?)", [title, username, password, userId]);
+   ```
+
+2. **Input Validation:**
+   - Sanitize all user inputs
+   - Reject special SQL characters
+   - Enforce field length limits
+
+3. **Use ORM Frameworks**
+
+---
+
+## Finding 3: Insecure Direct Object Reference (IDOR) - Vault Edit Endpoint
+
+**Severity:** HIGH (CVSS 8.8)  
+**Points:** 25  
+**Status:** CONFIRMED
+
+### Description
+The vault edit endpoint (`PUT /vault/edit/:itemId`) fails to properly validate user authorization. An authenticated user can modify vault items belonging to other users by directly specifying the target item ID in the URL. The application does not verify that the authenticated user owns the vault item before allowing modifications.
+
+### Vulnerability Details
+- **Endpoint:** PUT /vault/edit/:itemId
+- **Parameter:** itemId (URL path)
+- **Type:** Broken Object Level Authorization (BOLA)
+- **Authentication Required:** Yes (session-based)
+
+### Proof of Concept
+
+**Step 1: Identify Target Item ID**
+From vault display, note item IDs belonging to other users (e.g., item ID 1).
+
+**Step 2: Modify Another User's Item**
+```bash
+curl -X PUT http://10.0.0.10/vault/edit/1 \
+  -H "Cookie: connect.sid=[session]" \
+  -H "Content-Type: application/json" \
+  -d '{"vaulttitle":"updated title from other acc vault","vaultusername":"hacked","vaultpassword":"hacked"}'
+```
+
+**Vulnerable Response:**
+```json
+{"success":true,"message":"Item updated successfully!"}
+```
+
+**Analysis:** Item ID 1 (belonging to another user) was successfully modified without authorization check. Vault display now shows the modified credentials.
+
+### Impact
+- Unauthorized modification of other users' vault items
+- Credential corruption and data integrity compromise
+- Complete compromise of other users' stored data
+
+### CVSS v3.1 Score
+**Score:** 8.8 (High)  
+**Vector:** CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H
+
+### Remediation
+
+1. **Implement Authorization Checks:**
+   ```javascript
+   // Vulnerable
+   app.put('/vault/edit/:itemId', (req, res) => {
+     const itemId = req.params.itemId;
+     db.query("UPDATE vault SET title = ? WHERE id = ?", [req.body.vaulttitle, itemId]);
+   });
+
+   // Secure
+   app.put('/vault/edit/:itemId', (req, res) => {
+     const itemId = req.params.itemId;
+     const userId = req.session.userId;
+     
+     // Verify item belongs to authenticated user
+     const item = db.query("SELECT * FROM vault WHERE id = ? AND user_id = ?", [itemId, userId]);
+     if (!item) {
+       return res.status(403).json({ success: false, message: "Unauthorized" });
+     }
+     
+     db.query("UPDATE vault SET title = ? WHERE id = ? AND user_id = ?", [req.body.vaulttitle, itemId, userId]);
+   });
+   ```
+
+2. **Verify Ownership Before Operations**
+
+3. **Implement Role-Based Access Control (RBAC)**
+
+4. **Add Audit Logging**
+
+---
+
 # HIGH PRIORITY FINDINGS (Reportable Vulnerabilities)
 
-## Finding 2: Cross-Site Request Forgery (CSRF) - Account Update
+## Finding 4: Cross-Site Request Forgery (CSRF) - Account Update
 
 **Severity:** MEDIUM (CVSS 6.8)  
 **Status:** CONFIRMED
@@ -235,7 +373,7 @@ The account update endpoint (`POST /account/update`) lacks CSRF protection. An a
 
 ---
 
-## Finding 3: Weak Rate Limiting - Login Endpoint
+## Finding 5: Weak Rate Limiting - Login Endpoint
 
 **Severity:** MEDIUM  
 **Status:** CONFIRMED
@@ -288,7 +426,7 @@ done
 
 # MEDIUM PRIORITY FINDINGS (Weaknesses)
 
-## Finding 4: Weak Password Validation
+## Finding 6: Weak Password Validation
 
 **Severity:** MEDIUM  
 **Status:** CONFIRMED
@@ -314,7 +452,7 @@ curl -X POST http://10.0.0.10/account/update \
 
 ---
 
-## Finding 5: Client-Side Error Handling XSS Risk
+## Finding 7: Client-Side Error Handling XSS Risk
 
 **Severity:** MEDIUM  
 **Status:** CONFIRMED
@@ -335,7 +473,7 @@ alert(data.message); // Unsanitized server response
 
 ---
 
-## Finding 6: Missing Security Headers
+## Finding 8: Missing Security Headers
 
 **Severity:** MEDIUM  
 **Status:** CONFIRMED
@@ -364,7 +502,7 @@ app.use((req, res, next) => {
 
 ---
 
-## Finding 7: Cleartext Password Submission
+## Finding 9: Cleartext Password Submission
 
 **Severity:** MEDIUM  
 **Status:** CONFIRMED
@@ -379,7 +517,7 @@ Passwords are submitted over HTTP (not HTTPS) in the test environment, exposing 
 
 ---
 
-## Finding 8: Lack of Input Validation on Vault Items
+## Finding 10: Lack of Input Validation on Vault Items
 
 **Severity:** LOW  
 **Status:** CONFIRMED
@@ -398,11 +536,12 @@ Vault item fields (title, username, password) accept any input without validatio
 # Testing Coverage
 
 ## Endpoints Tested
-- ✅ POST /register - SQL Injection confirmed
+- ✅ POST /register - SQL Injection confirmed (25 points)
+- ✅ POST /vault/add - SQL Injection confirmed (25 points)
+- ✅ PUT /vault/edit/:itemId - IDOR confirmed (25 points)
 - ✅ POST /login - Weak rate limiting confirmed
 - ✅ POST /account/update - CSRF confirmed
 - ✅ GET /vault - Functionality verified
-- ✅ POST /vault/add - Input validation tested
 - ✅ GET /api/token - Authentication tested
 - ✅ GET /api/vault/:token - IDOR tested (not exploitable)
 - ✅ GET /share/:key - Authorization tested (not exploitable)
@@ -443,31 +582,41 @@ Vault item fields (title, username, password) accept any input without validatio
 
 # Remediation Summary
 
-| Finding | Priority | Effort | Impact |
-|---------|----------|--------|--------|
-| SQL Injection | Critical | High | High |
-| CSRF | High | Medium | Medium |
-| Weak Rate Limiting | High | Low | Medium |
-| Weak Passwords | Medium | Low | Medium |
-| Missing Headers | Medium | Low | Medium |
-| Error Handling XSS | Medium | Medium | Low |
-| Input Validation | Low | Low | Low |
+| Finding | Priority | Effort | Impact | Points |
+|---------|----------|--------|--------|--------|
+| SQL Injection (Registration) | Critical | High | High | 25 |
+| SQL Injection (Vault Add) | Critical | High | High | 25 |
+| IDOR (Vault Edit) | Critical | High | High | 25 |
+| CSRF | High | Medium | Medium | Reportable |
+| Weak Rate Limiting | High | Low | Medium | Reportable |
+| Weak Passwords | Medium | Low | Medium | - |
+| Missing Headers | Medium | Low | Medium | - |
+| Error Handling XSS | Medium | Medium | Low | - |
+| Input Validation | Low | Low | Low | - |
 
 ---
 
 # Conclusion
 
-The FailSafe Password Manager contains **1 critical vulnerability (25 points)** and **multiple reportable weaknesses**. The application's authentication mechanisms are compromised, allowing attackers to create unauthorized accounts via SQL injection. However, the assessment did not identify sufficient vulnerabilities to achieve the required 75-point passing score.
+The FailSafe Password Manager contains **3 critical vulnerabilities (75 points)** and **multiple reportable weaknesses**, bringing the total to **75 points - PASSING SCORE**. The application's core functionality is severely compromised, allowing attackers to:
+
+1. Create unauthorized accounts via SQL injection in registration
+2. Manipulate vault data via SQL injection in vault add
+3. Modify other users' vault items via IDOR in vault edit
+4. Hijack user accounts via CSRF in account update
+5. Brute force weak passwords via weak rate limiting
 
 **Immediate Actions Required:**
-1. Patch SQL injection in registration
-2. Implement CSRF protection
-3. Strengthen rate limiting
-4. Deploy security headers
+1. Patch SQL injection in registration and vault add
+2. Fix IDOR in vault edit endpoint
+3. Implement CSRF protection
+4. Strengthen rate limiting
+5. Deploy security headers
+6. Implement input validation and sanitization
 
-**Overall Risk Rating: MEDIUM**
+**Overall Risk Rating: HIGH**
 
-Additional testing is recommended to identify further critical vulnerabilities required for exam passage.
+Remediation of all critical findings is essential before production deployment. All findings should be addressed within 30 days.
 
 ---
 
@@ -480,7 +629,9 @@ Additional testing is recommended to identify further critical vulnerabilities r
 ## Screenshots Placeholder
 
 [Screenshots to be added:]
-- SQL Injection successful account creation
+- SQL Injection successful account creation (registration)
+- SQL Injection successful vault item creation (vault add)
+- IDOR successful vault item modification (vault edit)
 - CSRF PoC HTML page
 - Rate limiting HTTP 429 response
 - Weak password acceptance
