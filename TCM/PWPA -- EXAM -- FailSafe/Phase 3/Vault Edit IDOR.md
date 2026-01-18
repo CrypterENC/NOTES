@@ -39,7 +39,7 @@ Attackers can modify, corrupt, or delete other users' stored credentials. This a
 
 Create item in vault if you don't have one, if you have one in you vault, Click on Edit --> Update Item --> Check request in Burp for identifying the item id.
 -  ![[image_showing_vault_id.png]]
-Then Fuzz the [item_id using ffuf or burp intruder.
+Then Fuzz the [item_id] from 0 to 100 using ffuf or burp intruder.
 -  
 
 
