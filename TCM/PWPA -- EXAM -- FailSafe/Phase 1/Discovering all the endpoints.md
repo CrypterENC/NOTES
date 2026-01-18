@@ -5,4 +5,7 @@ for endpoint in /api/users /api/passwords /api/admin /api/profile /api/settings 
 done
 ```
 
--  Using FFUF to find all the endpoints
+-  **Using FFUF to find all the endpoints : **
+```bash
+ffuf -u http://10.0.0.10/FUZZ -w /usr/share/wordlists/dirb/common.txt
+```
