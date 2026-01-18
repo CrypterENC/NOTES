@@ -37,7 +37,7 @@ Attackers can modify, corrupt, or delete other users' stored credentials. This a
 
 ### Step 1: Identify Target Vault Item IDs
 
-View vault page and note item IDs from other users. Example: Item ID `1` belongs to another user.
+Create item in vault if you don't have one, if you have one in you vault, Click on Edit --> 
 
 ### Step 2: Attempt to Edit Own Vault Item (Control)
 
