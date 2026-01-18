@@ -28,7 +28,7 @@ Priority: u=0
 ```
 - Wordlist used : `xato-net-10-million-passwords-100.txt` from SecLists.
 
-#### Brute Force Testing Results
+#### Brute Force Testing on Login Page
 
 **Vulnerability:** Weak Rate Limiting (Broken Authentication - Partial Protection)
 
@@ -99,4 +99,4 @@ X-RateLimit-Reset: 1768720985
 
 ---
 
-#### Test
+#### Test Sql injection in login username : 
