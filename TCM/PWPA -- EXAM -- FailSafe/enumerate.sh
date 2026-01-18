@@ -24,6 +24,8 @@ for token in "${tokens[@]}"; do
         -X GET "http://10.0.0.10/api/vault/${token}" \
         -H "Content-Type: application/json")
 
+    echo "Raw API response: $response"
+
     # Parse JSON array of vault items
     if echo "$response" | jq -e '.[]' >/dev/null 2>&1; then
         echo "Found vault items for this user:"
