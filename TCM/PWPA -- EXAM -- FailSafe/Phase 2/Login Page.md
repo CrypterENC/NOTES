@@ -98,5 +98,3 @@ X-RateLimit-Reset: 1768720985
 - Screenshot of multiple failed login attempts
 
 ---
-
-#### Test Sql injection in login username : 
