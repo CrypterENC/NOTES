@@ -26,5 +26,8 @@ Priority: u=0
 
 {"username":"testuser1","password":"test"}
 ```
-- Wordlist used : `xato-net-10-million-passwords-100.txt` from seclist.
+- Wordlist used : `xato-net-10-million-passwords-100.txt` from SecLists.
+#### After perform Brute-Force on Login-page  
+
+
 - 
