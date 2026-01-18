@@ -8,10 +8,14 @@ echo "Create multiple test accounts to get their tokens, then query each vault"
 echo ""
 
 # Array of session cookies (add more as you have sessions)
+# To get session cookies for other users:
+# 1. Create/register new accounts via POST /register
+# 2. Login with POST /login to get session cookie
+# 3. Add the cookie to this array
 session_cookies=(
     "connect.sid=s%3AoJ5g5Gk6fvmfemhAviLKS-521lOrK8af.ln45ExmnMcmhS0AznQaRhb7lxiyxxpcQD%2B78Nsrsy%2FI"  # Your session
     # Add more session cookies here
-    # "connect.sid=token2"
+    # Example: "connect.sid=abc123..."
 )
 
 all_item_ids=()
