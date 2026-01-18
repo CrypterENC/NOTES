@@ -10,7 +10,10 @@
 ### Vulnerability: Insecure Direct Object Reference (IDOR) - 25 points
 
 **Description:**  
-The account update endpoint (`POST /account/update`) fails to properly validate that the authenticated user can only modify their own account. An attacker can modify the `user_id` parameter to update any other user's account password without authorization.
+The account update endpoint (`POST /account/update`) accepts an optional `user_id` parameter in the JSON body that should not exist. When this parameter is present, it overrides session-based authorization and allows authenticated users to modify any other user's account password without proper validation.
+
+**Impact:**  
+Attackers can change other users' passwords by adding a `user_id` parameter to the request body. This parameter should be rejected entirely - the application should always use the authenticated session to identify which user is making the update.
 
 **Impact:**  
 Attackers can change other users' passwords, leading to complete account takeover. Combined with SQL injection, this allows unauthorized access to any user account in the system.
@@ -58,13 +61,15 @@ Set-Cookie: connect.sid=s%3Ae3Eb2t-3HGOrpeXqxjmYmGprfLarVIXR.I0pzkyMIRP7STivrqi3
 curl -X POST http://10.0.0.10/account/update \
   -H "Cookie: connect.sid=s%3Ae3Eb2t-3HGOrpeXqxjmYmGprfLarVIXR.I0pzkyMIRP7STivrqi3tQqcxH1pQlOEoVCfg9q%2B7q88" \
   -H "Content-Type: application/json" \
-  -d '{"password":"Password123!","updatedPassword":"newpass123","updateField":"account","user_id":"1"}'
+  -d '{"password":"Password123!","updatedPassword":"newpass123","updateField":"account"}'
 ```
 
 **Expected Response:**
 ```json
 {"success":true,"message":"Account password updated successfully!"}
 ```
+
+**Note:** In the legitimate request, there's no `user_id` parameter. The application should use the session to identify which user is making the update.
 
 ### Step 3: Test IDOR - Update Another User's Account (user_id=2)
 
