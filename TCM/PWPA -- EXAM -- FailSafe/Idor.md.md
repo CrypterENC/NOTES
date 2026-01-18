@@ -26,4 +26,4 @@ Priority: u=0
 
 ```
 
-### IDOR in vault edit.
+### IDOR in `vault/edit` path [].
