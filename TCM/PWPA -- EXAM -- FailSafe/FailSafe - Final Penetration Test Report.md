@@ -56,7 +56,7 @@ This penetration test was conducted with authorization from FailSafe management.
 
 ## Executive Summary
 
-A comprehensive penetration test of the FailSafe Password Manager web application was conducted to identify security vulnerabilities and weaknesses. The assessment identified **2 critical vulnerabilities (50 points)** and **multiple reportable weaknesses**, bringing the total to **75 points - PASSING SCORE**.
+A comprehensive penetration test of the FailSafe Password Manager web application was conducted to identify security vulnerabilities and weaknesses. The assessment identified **1 critical vulnerability (25 points)** and **multiple reportable weaknesses**, bringing the total to **25 points - FAILING SCORE**.
 
 **Key Findings:**
 - SQL Injection in registration username field (25 points)
