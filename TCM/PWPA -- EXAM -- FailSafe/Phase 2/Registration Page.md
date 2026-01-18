@@ -109,10 +109,10 @@ Cache-Control: no-cache
 
 ---
 
-[Screenshots to be added here]
-- Screenshot of Burp Repeater showing successful SQL injection
-- Screenshot of registration with malicious payload
-- Screenshot of database impact (if any)
+[Screenshots Added]
+- ![[SQL Injection Registration - admin OR 1=1.png]] - Registration dialog showing SQL injection payload in username field
+- Screenshot shows successful registration with username: `admin' OR '1'='1`
+- Alert message confirms: "Registration successful!"
 
 ---
 
