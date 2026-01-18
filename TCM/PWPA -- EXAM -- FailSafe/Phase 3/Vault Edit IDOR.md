@@ -33,7 +33,7 @@ Attackers can modify, corrupt, or delete other users' stored credentials. This a
 
 ### Accounts Used:
 - **Attacker Account :** testuser1 (authenticated)
-- **Target Account :** testuser2 Any other user's vault items
+- **Target Account :** testuser2, Any other user's vault items
 
 ### Step 1: Identify Target Vault Item IDs
 
