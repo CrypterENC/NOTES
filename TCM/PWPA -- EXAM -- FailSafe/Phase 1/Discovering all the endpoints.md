@@ -5,4 +5,4 @@ for endpoint in /api/users /api/passwords /api/admin /api/profile /api/settings 
 done
 ```
 
--  
+-  Using FFUF to find all the endpoints
