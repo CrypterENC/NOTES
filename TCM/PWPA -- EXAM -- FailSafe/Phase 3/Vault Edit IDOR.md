@@ -38,8 +38,7 @@ Attackers can modify, corrupt, or delete other users' stored credentials. This a
 ### Step 1: Identify Target Vault Item IDs
 
 Create item in vault if you don't have one, if you have one in you vault, Click on Edit --> Update Item --> Check request in Burp for identifying the item id.
-
--  ![[Pasted image 20260118201414.png]]
+-  ![[image_showing_vault_id.png]]
 
 
 
