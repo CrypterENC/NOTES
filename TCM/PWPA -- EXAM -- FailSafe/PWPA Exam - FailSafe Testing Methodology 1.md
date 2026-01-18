@@ -121,6 +121,26 @@ curl http://10.0.0.10 | grep -i "version\|v[0-9]"
 
 ### PHASE 2: AUTHENTICATION TESTING
 
+#### Specific Vulnerabilities to Test (25-point targets in bold)
+
+**High Priority (25 points):**
+- [ ] **Broken Authentication** - Brute force protection (already tested - weak rate limiting found)
+- [ ] **SQL Injection** - Registration username field
+- [ ] **SQL Injection** - Login username field
+- [ ] **Stored XSS** - Registration fields
+- [ ] **Broken Authentication** - Account enumeration
+- [ ] **Broken Authentication** - Weak password policies
+- [ ] **Broken Authentication** - Default credentials
+
+**Medium Priority (reportable):**
+- [ ] Lack of Rate Limiting (already tested - 50 requests allowed)
+- [ ] Session management issues (predictable tokens, long timeout)
+- [ ] Password reset vulnerabilities
+- [ ] Account lockout bypass
+- [ ] Concurrent session issues
+- [ ] Logout functionality issues
+- [ ] Cookie security (Secure, SameSite flags)
+
 #### 2.1 Registration Functionality
 - [ ] Test registration form
 - [ ] Capture registration request in Burp
