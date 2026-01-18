@@ -94,6 +94,7 @@ X-RateLimit-Reset: 1768720985
 - Screenshot of Burp Intruder results showing rate limiting
 	- ![[Weak rate limiting found on login page.png]]
 - Screenshot of response headers with X-RateLimit values
+	-  ![[Pasted image 20260118130119.png]]
 - Screenshot of multiple failed login attempts
 
 ---
