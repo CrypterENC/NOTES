@@ -3,8 +3,8 @@
 
 ```
 
-Current user:pass --> 
+Attacker user's :  user:pass --> "test' OR '1'='1","password":"Password123!"}
 
-target user's : user:pass --> 
+target user's   :  user:pass --> testuser1:Password123!
 
 ```
