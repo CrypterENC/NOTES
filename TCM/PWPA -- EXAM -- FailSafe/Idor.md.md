@@ -25,3 +25,5 @@ Priority: u=0
 {"itemId":"12","vaulttitle":"updated title from other acc vault","vaultusername":"hacked","vaultpassword":"hacked"}
 
 ```
+
+### IDOR in vault edit.
