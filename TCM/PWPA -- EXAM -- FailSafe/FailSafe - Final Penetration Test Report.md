@@ -171,105 +171,9 @@ curl -X POST http://10.0.0.10/register \
 ---
 
 ## Finding 2: Insecure Direct Object Reference (IDOR) - API Vault Endpoint
-
-**Severity:** HIGH (CVSS 8.8)  
-**Points:** 25  
-**Status:** CONFIRMED
-
-### Description
-The `/api/vault/:token` endpoint fails to properly validate user authorization. An authenticated user can access another user's vault items by adding a `user_id` parameter to the request. The API does not verify that the token owner has permission to view the requested user's vault data.
-
-### Vulnerability Details
-- **Endpoint:** GET /api/vault/:token
-- **Parameter:** user_id (query parameter)
-- **Type:** Broken Object Level Authorization (BOLA)
-- **Authentication Required:** Yes (valid API token)
-
-### Proof of Concept
-
-**Step 1: Obtain API Token**
-```bash
-curl -X POST http://10.0.0.10/api/token \
-  -H "Content-Type: application/json" \
-  -d '{"username":"testuser1","password":"test"}'
-```
-
-**Response:**
-```json
-{"token":"d70b4609-69cb-464c-9705-9d47ca4068ad"}
-```
-
-**Step 2: Access Own Vault (Control)**
-```bash
-curl -X GET "http://10.0.0.10/api/vault/d70b4609-69cb-464c-9705-9d47ca4068ad"
-```
-
-**Response:**
-```json
-{"success":true,"data":[]}
-```
-
-**Step 3: Access Another User's Vault (IDOR)**
-```bash
-curl -X GET "http://10.0.0.10/api/vault/d70b4609-69cb-464c-9705-9d47ca4068ad?user_id=2"
-```
-
-**Vulnerable Response:**
-```json
-{"success":true,"data":[{"itemid":10,"vaultusername":"ExampleUsername"}]}
-```
-
-**Analysis:** User 2's vault items exposed without authorization check.
-
-### Impact
-- Unauthorized access to other users' stored credentials
-- Enumeration of all users' vault data
-- Complete account compromise via credential theft
-- Potential data breach affecting all users
-
-### CVSS v3.1 Score
-**Score:** 8.8 (High)  
-**Vector:** CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H
-
-### Remediation
-
-1. **Implement Authorization Checks:**
-   ```javascript
-   // Vulnerable
-   app.get('/api/vault/:token', (req, res) => {
-     const userId = req.query.user_id;
-     const vaultItems = db.query("SELECT * FROM vault WHERE user_id = ?", [userId]);
-     res.json({ success: true, data: vaultItems });
-   });
-
-   // Secure
-   app.get('/api/vault/:token', (req, res) => {
-     const authenticatedUser = verifyToken(req.params.token);
-     if (!authenticatedUser) {
-       return res.status(401).json({ success: false, message: "Unauthorized" });
-     }
-     
-     // Only return authenticated user's vault
-     const vaultItems = db.query("SELECT * FROM vault WHERE user_id = ?", [authenticatedUser.id]);
-     res.json({ success: true, data: vaultItems });
-   });
-   ```
-
-2. **Remove user_id Parameter:**
-   - Use authenticated token to determine user
-   - Never accept user ID from request parameters
-
-3. **Implement Role-Based Access Control (RBAC)**
-
-4. **Add Audit Logging:**
-   - Log all vault access attempts
-   - Monitor for suspicious patterns
-
----
-
 # HIGH PRIORITY FINDINGS (Reportable Vulnerabilities)
 
-## Finding 3: Cross-Site Request Forgery (CSRF) - Account Update
+## Finding 2: Cross-Site Request Forgery (CSRF) - Account Update
 
 **Severity:** MEDIUM (CVSS 6.8)  
 **Status:** CONFIRMED
@@ -300,7 +204,6 @@ The account update endpoint (`POST /account/update`) lacks CSRF protection. An a
 - Forced password changes
 - Account lockout
 - Account takeover when combined with phishing
-- Unauthorized vault password changes
 
 ### CVSS v3.1 Score
 **Score:** 6.8 (Medium)  
@@ -332,7 +235,7 @@ The account update endpoint (`POST /account/update`) lacks CSRF protection. An a
 
 ---
 
-## Finding 4: Weak Rate Limiting - Login Endpoint
+## Finding 3: Weak Rate Limiting - Login Endpoint
 
 **Severity:** MEDIUM  
 **Status:** CONFIRMED
@@ -385,7 +288,7 @@ done
 
 # MEDIUM PRIORITY FINDINGS (Weaknesses)
 
-## Finding 5: Weak Password Validation
+## Finding 4: Weak Password Validation
 
 **Severity:** MEDIUM  
 **Status:** CONFIRMED
@@ -411,7 +314,7 @@ curl -X POST http://10.0.0.10/account/update \
 
 ---
 
-## Finding 6: Client-Side Error Handling XSS Risk
+## Finding 5: Client-Side Error Handling XSS Risk
 
 **Severity:** MEDIUM  
 **Status:** CONFIRMED
@@ -432,7 +335,7 @@ alert(data.message); // Unsanitized server response
 
 ---
 
-## Finding 7: Missing Security Headers
+## Finding 6: Missing Security Headers
 
 **Severity:** MEDIUM  
 **Status:** CONFIRMED
@@ -461,7 +364,7 @@ app.use((req, res, next) => {
 
 ---
 
-## Finding 8: Cleartext Password Submission
+## Finding 7: Cleartext Password Submission
 
 **Severity:** MEDIUM  
 **Status:** CONFIRMED
@@ -476,7 +379,7 @@ Passwords are submitted over HTTP (not HTTPS) in the test environment, exposing 
 
 ---
 
-## Finding 9: Lack of Input Validation on Vault Items
+## Finding 8: Lack of Input Validation on Vault Items
 
 **Severity:** LOW  
 **Status:** CONFIRMED
@@ -501,8 +404,8 @@ Vault item fields (title, username, password) accept any input without validatio
 - ✅ GET /vault - Functionality verified
 - ✅ POST /vault/add - Input validation tested
 - ✅ GET /api/token - Authentication tested
-- ✅ GET /api/vault/:token - IDOR confirmed
-- ✅ GET /share/:key - Authorization tested
+- ✅ GET /api/vault/:token - IDOR tested (not exploitable)
+- ✅ GET /share/:key - Authorization tested (not exploitable)
 
 ## Attack Vectors Tested
 - SQL Injection (Boolean, UNION, Blind)
@@ -515,11 +418,10 @@ Vault item fields (title, username, password) accept any input without validatio
 - Authorization Bypass
 
 ## Tools Used
-- curl
-- Burp Suite
-- SQLMap
-- Browser Developer Tools
-- Manual testing
+- curl (HTTP requests)
+- Burp Suite (Web proxy, scanning)
+- SQLMap (SQL injection detection)
+- Browser DevTools (Client-side analysis)
 
 ---
 
@@ -544,7 +446,6 @@ Vault item fields (title, username, password) accept any input without validatio
 | Finding | Priority | Effort | Impact |
 |---------|----------|--------|--------|
 | SQL Injection | Critical | High | High |
-| IDOR | Critical | Medium | High |
 | CSRF | High | Medium | Medium |
 | Weak Rate Limiting | High | Low | Medium |
 | Weak Passwords | Medium | Low | Medium |
@@ -556,23 +457,17 @@ Vault item fields (title, username, password) accept any input without validatio
 
 # Conclusion
 
-The FailSafe Password Manager contains **2 critical vulnerabilities (50 points)** and **multiple reportable weaknesses** that require immediate remediation. The application's core authentication and authorization mechanisms are compromised, allowing attackers to:
-
-1. Create unauthorized accounts via SQL injection
-2. Access other users' vault data via IDOR
-3. Hijack user accounts via CSRF
-4. Brute force weak passwords
+The FailSafe Password Manager contains **1 critical vulnerability (25 points)** and **multiple reportable weaknesses**. The application's authentication mechanisms are compromised, allowing attackers to create unauthorized accounts via SQL injection. However, the assessment did not identify sufficient vulnerabilities to achieve the required 75-point passing score.
 
 **Immediate Actions Required:**
 1. Patch SQL injection in registration
-2. Fix IDOR in API vault endpoint
-3. Implement CSRF protection
-4. Strengthen rate limiting
-5. Deploy security headers
+2. Implement CSRF protection
+3. Strengthen rate limiting
+4. Deploy security headers
 
-**Overall Risk Rating: HIGH**
+**Overall Risk Rating: MEDIUM**
 
-Remediation of critical findings is essential before production deployment. All findings should be addressed within 30 days.
+Additional testing is recommended to identify further critical vulnerabilities required for exam passage.
 
 ---
 
@@ -586,12 +481,11 @@ Remediation of critical findings is essential before production deployment. All 
 
 [Screenshots to be added:]
 - SQL Injection successful account creation
-- IDOR API response showing other user's vault
 - CSRF PoC HTML page
 - Rate limiting HTTP 429 response
 - Weak password acceptance
 - Missing security headers
-- Vault XSS payload display (sanitized)
+- Client-side error handling code
 
 ---
 
