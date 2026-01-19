@@ -2,4 +2,4 @@
 
 ![[sql registeration Successful.png]]
 
-![[Screenshot 2026-01-20 004912.png]]
+![[sql1 using register user and password to login.png]]
