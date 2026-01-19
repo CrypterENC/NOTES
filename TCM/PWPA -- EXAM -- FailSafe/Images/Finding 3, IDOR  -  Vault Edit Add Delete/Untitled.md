@@ -1,6 +1,4 @@
-![[Before.png]]
-
-![[before performing idor on edit on target acc.png]]
+![[before performing idor on edit on target acc.png.png]]
 
 ![[edit id in burp suite intercept.png]]
 
