@@ -121,3 +121,25 @@ Test if unauthenticated user can access admin/protected functions:
 curl http://10.0.0.10/admin
 curl http://10.0.0.10/api/admin
 curl http://10.0.0.10/api/users
+
+======================================================================
+
+Test Broken Authentication (Session Fixation):
+
+# Step 1: Get pre-login cookie
+curl -c cookies.txt http://10.0.0.10/login
+ 
+# Step 2: Login with valid credentials
+curl -b cookies.txt -X POST http://10.0.0.10/login \
+  -H "Content-Type: application/json" \
+  -d '{"username":"testuser","password":"testpass"}'
+ 
+# Step 3: Try accessing /vault with old cookie
+curl -b cookies.txt http://10.0.0.10/vault
+Or test BFLA (unauthenticated access to protected endpoints):
+
+curl http://10.0.0.10/admin
+curl http://10.0.0.10/api/admin
+curl http://10.0.0.10/api/users
+
+=======
