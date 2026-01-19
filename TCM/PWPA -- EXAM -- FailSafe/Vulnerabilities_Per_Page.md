@@ -56,6 +56,12 @@ HTTPS: Confirm URL is http://, not https:// (cleartext submission).
 
 All confirmed as medium/low weaknesses, no points. If new findings, report. Otherwise, pentest complete at 75 points.
 
+============================================================
+
+Test weak password acceptance.
+
 curl -X POST http://10.0.0.10/register \
   -H "Content-Type: application/json" \
   -d '{"username":"weakpassuser123","password":"1"}'
+
+============================================================
