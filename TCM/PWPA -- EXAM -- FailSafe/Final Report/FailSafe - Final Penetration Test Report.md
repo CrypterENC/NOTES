@@ -185,9 +185,7 @@ curl -X POST http://10.0.0.10/register \
 
 **Step 1 Screenshot:** Registration modal with SQL payload in username field
 
-![[Pasted image 20260120003207.png]]
-
-![[sql_registeration_modal.png]]
+![[sqli_registeration_burp_version.png]]
 
 **Step 2 Screenshot:** Clicking Sign Up button
 
