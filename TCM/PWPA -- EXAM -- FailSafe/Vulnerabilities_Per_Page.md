@@ -138,8 +138,10 @@ curl -b cookies.txt -X POST http://10.0.0.10/login \
 curl -b cookies.txt http://10.0.0.10/vault
 Or test BFLA (unauthenticated access to protected endpoints):
 
+=======================================================================
+
 curl http://10.0.0.10/admin
 curl http://10.0.0.10/api/admin
 curl http://10.0.0.10/api/users
 
-=======
+=======================================================================
