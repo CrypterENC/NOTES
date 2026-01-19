@@ -2,4 +2,4 @@
 
 ![[ffuf results showing all payloads returning 200 OK.png]]
 
-![[Pasted image 20260120034113.png]]
+![[Successful login response with rate limit headers still present.png]]
