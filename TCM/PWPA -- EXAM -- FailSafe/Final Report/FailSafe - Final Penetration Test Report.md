@@ -391,7 +391,7 @@ Item deleted successfully
 2. Logout or use incognito mode to login as attacker user.
 3. As attacker, click on edit button to edit your own item and capture the request.
 4. Attempt to edit your own item by modifying the PUT request to /vault/edit/1 (your ID), change data, forward, observe success.
-5. Alternatively, send DELETE request to /vault/delete/1 (target item ID), observe "Item deleted successfully".
+5. Alternatively, send DELETE request to /vault/delete/1 (target item ID), observe "Item deleted successfully" - note that the same IDOR allows deleting other users' items.
 6. Login back as victim, verify the item has been modified or deleted.
 
 **Screenshot 1:** Original vault item belonging to another user
