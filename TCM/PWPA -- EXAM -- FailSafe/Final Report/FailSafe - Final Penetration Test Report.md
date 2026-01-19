@@ -264,11 +264,23 @@ curl -X POST http://10.0.0.10/vault/add \
 
 #### Screenshots and Reproduction Steps
 
-**Screenshot 1:** SQL injection payload in vault add form (title field)
+**Recreation Steps:**
+1. Login to the application with valid credentials.
+2. Navigate to the vault page (/vault).
+3. Unlock the vault by entering your account password and clicking "Unlock".
+4. Click the "Add Item" button in the vault section.
+5. In the title field, enter: `' OR '1'='1`
+6. In username field, enter: `test`
+7. In password field, enter: `test123`
+8. Click "Add Item".
+9. Observe success alert: "Item added successfully!"
+10. Verify the item appears in the vault list with the injected title.
+
+**Screenshot 1:** Vault add form with SQL payload in title field
 
 **Screenshot 2:** Successful vault item creation response
 
-**Screenshot 3:** Vault display showing injected title
+**Screenshot 3:** Vault display showing item with injected title
 
 **Command Output:**
 
