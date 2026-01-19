@@ -181,15 +181,11 @@ curl -X POST http://10.0.0.10/register \
 
 **Step 1 Screenshot:** Registration modal with SQL payload in username field
 
-![[sqli_registeration_burp_version.png]]
-
 **Step 2 Screenshot:** Clicking Sign Up button
 
 **Step 3 Screenshot:** Success alert message
 
 **Step 4 Screenshot:** Login modal with created account
-
-![[sqli_login_burp_version.png]]
 
 **Step 5 Screenshot:** Successful login redirect to vault page
 
