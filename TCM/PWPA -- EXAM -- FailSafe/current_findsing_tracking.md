@@ -7,6 +7,7 @@
 - **IDOR in Vault Edit** (25 points): Allows editing other users' vault items by manipulating item IDs.
 - **CSRF in Account Update** (Reportable): Forces password changes without user consent.
 - **Information Disclosure in Error Messages** (Medium): Exposes stack traces and internal paths on malformed requests.
+- **Broken Authentication - Session Fixation** (25 points): Old session cookies remain valid after login, allowing persistent access.
 
 ## Negative Findings
 
@@ -16,7 +17,11 @@
 - Open Redirect: Not present in login.
 - Parameter Pollution: Not exploitable in vault endpoints.
 - API IDOR: Not tested or confirmed.
-- Session Fixation: Not tested.
+- Session Fixation: Exploitable (old cookies remain valid post-login).
+- Command Injection: Not exploitable.
+- XXE: Not applicable (JSON API).
+- BFLA: Not exploitable (no admin endpoints).
+- SSRF: Not exploitable.
 
 ## Testing Status
 
