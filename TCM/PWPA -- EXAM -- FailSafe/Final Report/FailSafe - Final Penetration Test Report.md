@@ -264,11 +264,17 @@ curl -X POST http://10.0.0.10/vault/add \
 
 #### Screenshots and Reproduction Steps
 
-**Recreation Steps:**
+**Recreation Steps: for /vault/edit/:id**
 
-**Step 1:** Know the Vault ID of another user (Target User), then got to vault and edit the item to get the item id.
+**Step 1:** Know the Vault ID of another user (Target User), To know the id use Burp Suite to intercept traffic and see the id.
 
-1. Login to the application with valid credentials.
+**Step 2:** Login as attacker user, navigate to vault, add an item (note the item ID from the edit link, e.g., /vault/edit/1).
+
+**Step 3:** Login as victim user, navigate to vault, add an item (note the item ID from the edit link, e.g., /vault/edit/1).
+
+**Step 4:** Login to the application with valid credentials.
+
+
 2. Navigate to the vault page (/vault).
 3. Unlock the vault by entering your account password and clicking "Unlock".
 4. Click the "Add Item" button in the vault section.
