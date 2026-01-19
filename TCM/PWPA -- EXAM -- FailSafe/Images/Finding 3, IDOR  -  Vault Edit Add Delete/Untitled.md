@@ -5,5 +5,5 @@
 
 ![[attacker edit request in burp suite.png]]
 
-
+![[attacker editing target user item in burp suite.png]]
 
