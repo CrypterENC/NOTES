@@ -7,4 +7,3 @@
 
 ![[edit request captured for attacker item.png]]
 
-![[attacker successfully editing traget users item num.png]]
