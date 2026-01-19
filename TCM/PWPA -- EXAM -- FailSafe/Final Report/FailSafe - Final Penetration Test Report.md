@@ -264,7 +264,7 @@ curl -X POST http://10.0.0.10/vault/add \
 
 #### Screenshots and Reproduction Steps
 
-**Recreation Steps: for /vault/edit/:id**
+**Recreation Steps: for /vault/edit/:id (same applies for delete --> /vault/delete/:id)  **
 
 **Step 1:** Know the Vault ID of another user (Target User), To know the id use Burp Suite to intercept traffic and see the id.
 
