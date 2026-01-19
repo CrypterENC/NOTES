@@ -184,6 +184,7 @@ curl -X POST http://10.0.0.10/register \
 9. Click "Log In" - should redirect to /vault.
 
 **Step 1 Screenshot:** Registration modal with SQL payload in username field
+![[sql_registeration_modal.png]]
 
 **Step 2 Screenshot:** Clicking Sign Up button
 
