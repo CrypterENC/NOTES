@@ -498,16 +498,22 @@ curl http://10.0.0.10/vault \
 #### Screenshots and Reproduction Steps
 
 **Recreation Steps:**
-1. Send GET request to /login to capture the initial session cookie (connect.sid).
-2. Login with valid credentials using the same session cookie.
-3. After login, access /vault with the old session cookie (before regeneration).
-4. Observe that both old and new cookies grant access, confirming fixation.
+1. Login to the application and capture the session cookie (connect.sid).
+2. Logout from the application.
+3. Login again to generate a new session cookie.
+4. Logout again.
+5. Login a third time and use Burp Suite to intercept the request.
+6. In Burp, modify the session cookie to the first captured cookie (from step 1).
+7. Forward the request and observe successful login with the old cookie.
+8. Verify that the old session cookie (from step 1) still grants access to /vault, confirming session fixation.
 
-**Screenshot 1:** Pre-login cookie capture
+**Screenshot 1:** First login - capture initial session cookie
 
-**Screenshot 2:** Login again to renerate new cookie
+**Screenshot 2:** Second login - generate new session cookie
 
-**Screenshot 3:** Post-login access with old cookie still working
+**Screenshot 3:** Third login - Burp intercept showing cookie replacement with first captured cookie
+
+**Screenshot 4:** Successful login with old session cookie (session fixation confirmed)
 
 **Command Output:**
 
