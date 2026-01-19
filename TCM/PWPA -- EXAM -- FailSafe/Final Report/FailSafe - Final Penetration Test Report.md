@@ -582,28 +582,31 @@ X-RateLimit-Remaining: 45
 #### Screenshots and Reproduction Steps
 
 **Recreation Steps:**
-1. Setup Burp Suite Intruder for POST /login endpoint.
-2. Configure intruder payload on the password field with numbers 1 to 60 (e.g., wrongpass1, wrongpass2, ...).
-3. Set intruder to send requests sequentially.
-4. Start the attack with 60 requests.
-5. Observe responses: first 50 return 200 OK, requests 51+ return 429 Too Many Requests.
+1. Setup Burp Suite Intruder or ffuf for POST /login endpoint.
+2. Configure payload on the password field with a wordlist of common passwords (100+ entries).
+3. Set Burp Intruder to send requests with high thread count (40+) or use ffuf with default threading.
+4. Start the attack with the same session cookie.
+5. Monitor responses: all requests return 200 OK regardless of count.
+6. Identify successful login by response size difference (46 bytes vs 50 bytes for invalid credentials).
+7. Confirm password cracked after 101 attempts with no rate limiting enforcement.
 
 **Screenshot 1:** Burp Intruder setup for brute force login attempts
 
-**Screenshot 2:** First 50 requests succeeding (200 responses)
+**Screenshot 2:** ffuf results showing all payloads returning 200 OK
 
-**Screenshot 3:** Request 51+ returning HTTP 429
+**Screenshot 3:** Successful password "csrfhacked123" with Size: 46 response
+
+**Screenshot 4:** Successful login response with rate limit headers still present
 
 **Command Output:**
 
 ```
-for i in {1..60}; do
-  curl -X POST http://10.0.0.10/login \
-    -H "Content-Type: application/json" \
-    -d '{"username":"testuser","password":"wrongpass'$i'"}'
-done
+ffuf -request login_brute.txt -w brute_payload.txt -u http://10.0.0.10/login
 
-# Responses: 50x 200 OK, then 429 Too Many Requests
+csrfhacked123           [Status: 200, Size: 46, Words: 2, Lines: 1, Duration: 1229ms]
+
+# All other payloads return Size: 50 (Invalid credentials)
+# Rate limit headers present but no blocking occurs
 ```
 
 ---
