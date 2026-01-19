@@ -1000,6 +1000,12 @@ curl http://10.0.0.10/vault \
 
 #### Screenshots and Reproduction Steps
 
+**Recreation Steps:**
+1. Send GET request to /login to capture the initial session cookie (connect.sid).
+2. Login with valid credentials using the same session cookie.
+3. After login, access /vault with the old session cookie (before regeneration).
+4. Observe that both old and new cookies grant access, confirming fixation.
+
 **Screenshot 1:** Pre-login cookie capture
 
 **Screenshot 2:** Login with the same cookie
