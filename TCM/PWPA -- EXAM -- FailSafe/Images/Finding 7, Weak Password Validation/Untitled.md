@@ -1,0 +1,2 @@
+
+![[weak password validation.png]]
