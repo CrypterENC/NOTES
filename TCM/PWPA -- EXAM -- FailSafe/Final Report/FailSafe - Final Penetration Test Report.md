@@ -374,6 +374,16 @@ curl -X PUT http://10.0.0.10/vault/edit/1 \
 
 #### Screenshots and Reproduction Steps
 
+**Recreation Steps:**
+1. Login as victim user, navigate to vault, add an item (note the item ID from the edit link, e.g., /vault/edit/1).
+2. Logout or use incognito mode to login as attacker user.
+3. As attacker, use Burp Proxy to intercept traffic.
+4. Attempt to edit the victim's item by modifying the PUT request to /vault/edit/1 (victim's ID).
+5. Change title/username/password in the request body.
+6. Forward the request.
+7. Observe success response.
+8. Login back as victim, verify the item has been modified.
+
 **Screenshot 1:** Original vault item belonging to another user
 
 **Screenshot 2:** IDOR request modifying item ID of another user
