@@ -505,7 +505,7 @@ curl http://10.0.0.10/vault \
 
 **Screenshot 1:** Pre-login cookie capture
 
-**Screenshot 2:** Login with the same cookie
+**Screenshot 2:** Login again to renerate new cookie
 
 **Screenshot 3:** Post-login access with old cookie still working
 
