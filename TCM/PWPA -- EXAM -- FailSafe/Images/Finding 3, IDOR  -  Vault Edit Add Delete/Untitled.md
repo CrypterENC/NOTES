@@ -7,3 +7,4 @@
 
 ![[attacker editing target user item in burp suite.png]]
 
+![[Pasted image 20260120022100.png]]
