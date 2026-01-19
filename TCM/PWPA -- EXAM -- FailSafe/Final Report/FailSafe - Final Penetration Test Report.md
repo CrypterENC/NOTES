@@ -265,6 +265,9 @@ curl -X POST http://10.0.0.10/vault/add \
 #### Screenshots and Reproduction Steps
 
 **Recreation Steps:**
+
+**Step 1:** Know the Vault ID of another user (Target User)
+
 1. Login to the application with valid credentials.
 2. Navigate to the vault page (/vault).
 3. Unlock the vault by entering your account password and clicking "Unlock".
