@@ -533,6 +533,67 @@ Vault item fields (title, username, password) accept any input without validatio
 
 ---
 
+## Finding 11: Information Disclosure - Error Messages
+
+**Severity:** MEDIUM  
+**Status:** CONFIRMED
+
+### Description
+The application exposes internal stack traces and file paths in error responses for malformed JSON requests.
+
+### Vulnerability Details
+- **Endpoints:** POST /login, POST /register
+- **Trigger:** Malformed JSON in request body
+- **Response:** HTTP 400 with full stack trace
+
+### Proof of Concept
+
+```bash
+curl -X POST http://10.0.0.10/login \
+  -H "Content-Type: application/json" \
+  -d '{"username":"test","password"}'
+```
+
+**Response:** HTTP 400 with stack trace revealing:
+- Node.js version and paths (/usr/app/node_modules/)
+- Technology stack (Express, body-parser)
+- Internal error details
+
+### Impact
+- Attackers can fingerprint the technology stack
+- Identify vulnerable libraries and versions
+- Understand application structure for further attacks
+- Enumerate internal file paths
+
+### CVSS v3.1 Score
+**Score:** 5.3 (Medium)  
+**Vector:** CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N
+
+### Remediation
+
+1. **Implement Custom Error Handling:**
+   ```javascript
+   app.use((err, req, res, next) => {
+     console.error(err.stack); // Log internally
+     res.status(400).json({ success: false, message: "Invalid request format" });
+   });
+   ```
+
+2. **Disable Stack Traces in Production:**
+   ```javascript
+   process.env.NODE_ENV = 'production';
+   ```
+
+3. **Use Error Handling Middleware:**
+   - helmet.js for security headers
+   - Custom error pages
+
+4. **Input Validation:**
+   - Validate JSON structure before parsing
+   - Use safe JSON parsing libraries
+
+---
+
 # Testing Coverage
 
 ## Endpoints Tested
@@ -593,6 +654,7 @@ Vault item fields (title, username, password) accept any input without validatio
 | Missing Headers | Medium | Low | Medium | - |
 | Error Handling XSS | Medium | Medium | Low | - |
 | Input Validation | Low | Low | Low | - |
+| Information Disclosure | Medium | Low | Low | - |
 
 ---
 
