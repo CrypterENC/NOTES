@@ -7,3 +7,5 @@
 ![[attacker editing target user item in burp suite.png]]
 
 ![[attacker successfully changed target users item.png]]
+
+![[attacker delete target users item.png]]
