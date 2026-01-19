@@ -389,9 +389,9 @@ Item deleted successfully
 **Recreation Steps:**
 1. Login as victim user, navigate to vault, add an item (note the item ID from the edit link, e.g., /vault/edit/1) use Burp Suite to intercept traffic.
 2. Logout or use incognito mode to login as attacker user.
-3. As attacker, use Burp Proxy to intercept traffic.
-4. Attempt to edit the victim's item by modifying the PUT request to /vault/edit/1 (victim's ID), change data, forward, observe success.
-5. Alternatively, send DELETE request to /vault/delete/1, observe "Item deleted successfully".
+3. As attacker, click on edit button to edit your own item and capture the request.
+4. Attempt to edit your own item by modifying the PUT request to /vault/edit/1 (your ID), change data, forward, observe success.
+5. Alternatively, send DELETE request to /vault/delete/1 (target item ID), observe "Item deleted successfully".
 6. Login back as victim, verify the item has been modified or deleted.
 
 **Screenshot 1:** Original vault item belonging to another user
