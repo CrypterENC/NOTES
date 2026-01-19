@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/custom.css">
+
+    <title>FailSafe | Password Manager</title>
+</head>
+
+<body class="d-flex flex-column min-vh-100">
+    <!-- nav -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" href="#"><img src="/images/logo.png" class="nav-logo" alt="FailSafe logo"></a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#"><strong>vault</strong></a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/account">account</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/api">API</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/signout">sign out</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- main -->
+    <main class="flex-fill">
+        <div class="container mt-4">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="row">
+                        <!-- alerts -->
+                        <div class="col-md-6">
+                            <div class="alert alert-primary" role="alert">
+                                <h2>Welcome to your vault</h2>
+                                <p>To add, edit or delete credentials, unlock your vault with your password. This can be changed on the <a href="/account">account page</a> for quick and easy access without the need of logging out!</p>
+                                <p>Be sure to lock it again once you are finished so that your credentials are kept secure.</p>
+                            </div>
+                        </div>
+                    
+                        <div class="col-md-6">
+                            <!-- unlock form -->
+                            <form id="unlockForm" action="/vault/unlock" method="POST"  novalidate>
+                                <div class="mb-3">
+                                    <h2 class="mt-3">Enter password to unlock vault</h2>
+                                    <input type="password" class="form-control" id="vaultPassword" name="password" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Unlock</button>
+                            </form>
+                        
+                            <!-- locked content -->
+                            <div id="vaultContent" style="display: none;">
+                                
+                                <!-- add new item -->
+                                <div id="addVaultItemFormDiv">
+                                    <h2 class="mt-3">Add new vault item</h2>
+                                    <form id="addVaultItemForm" onsubmit="event.preventDefault();" novalidate>
+                                        <div class="row">
+                                            <div class="col-md-4 mb-3">
+                                                <label for="newVaultTitle" class="form-label">Title</label>
+                                                <input type="text" class="form-control" id="newVaultTitle" name="vaulttitle" required>
+                                            </div>
+                                            <div class="col-md-4 mb-3">
+                                                <label for="newVaultUsername" class="form-label">Username</label>
+                                                <input type="text" class="form-control" id="newVaultUsername" name="vaultusername" required>
+                                            </div>
+                                            <div class="col-md-4 mb-3">
+                                                <label for="newVaultPassword" class="form-label">Password</label>
+                                                <input type="password" class="form-control" id="newVaultPassword" name="vaultpassword" required>
+                                            </div>
+                                        </div>
+                                        <button type="submit" class="btn btn-success" id="addVaultItemButton">Add Item</button>
+                                        <button id="lockButton" class="btn btn-danger">Lock Vault</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <hr />
+                    <div class="row">
+                        <div id="vaultItems" class="row mt-4"></div>
+                    </div>
+                    <div class="row" id="sharingRow" style="display: none;">
+                        <hr />
+                        <div class="col-md-6">
+                            <form id="addSharedItemForm" action="#" method="GET" novalidate>
+                                <div class="mb-3">
+                                    <p class="mt-3">To add a credential that has been shared with you, enter the key below and a copy will be created in your vault.</p>
+                                    <input type="text" class="form-control" id="sharedKey" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Add item</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- footer -->
+    <div class="mt-4 pt-4 footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-8">
+                    <h2>FailSafe Password Manager 2023</h2>
+                    <p>Keeping your credentials safe!</p>
+                </div>
+                <div class="col-md-4">
+                    <p class="text-end">Follow us!</p>
+                    <img class="socialmedia-img float-right" src="/images/facebook.png">
+                    <img class="socialmedia-img float-right" src="/images/linkedin.png">
+                    <img class="socialmedia-img float-right" src="/images/instagram.png">
+                    <img class="socialmedia-img float-right" src="/images/youtube.png">
+                </div>
+            </div>
+            <hr />
+            <div class="row">
+                <p class="text-center">Don't forget to take regular breaks! You got this!</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- edit item modal -->
+    <div class="modal fade" id="editVaultItemModal" tabindex="-1" aria-labelledby="editVaultItemModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editVaultItemModalLabel">Edit Vault Item</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form action="/vault/edit" id="editVaultItemForm">
+                        <input type="hidden" id="editItemId" name="itemId">
+                        <div class="mb-3">
+                            <label for="editVaultTitle" class="form-label">Title</label>
+                            <input type="text" class="form-control" id="editVaultTitle" name="vaulttitle" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editVaultUsername" class="form-label">Username</label>
+                            <input type="text" class="form-control" id="editVaultUsername" name="vaultusername" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editVaultPassword" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="editVaultPassword" name="vaultpassword" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Update Item</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- share vault item modal -->
+    <div class="modal fade" id="shareModal" tabindex="-1" aria-labelledby="shareModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                <h5 class="modal-title" id="shareModalLabel">Share Vault Item</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>To share this credential, send this link securely to the user</p>
+                    <p id="shareURL"></p>
+                    <button id="copyToClipboard" class="btn btn-primary">Copy to Clipboard</button>
+                </div>
+            </div>
+        </div>
+    </div>
+  
+
+    <script src="/js/bootstrap.min.js" type="text/javascript"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const unlockForm = document.getElementById('unlockForm');
+            const vaultContent = document.getElementById('vaultContent');
+            const lockButton = document.getElementById('lockButton');
+            const vaultItems = document.getElementById('vaultItems');
+            const addVaultItemButton = document.getElementById('addVaultItemButton');
+        
+            unlockForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+        
+                const formData = new FormData(unlockForm);
+                const response = await fetch('/vault/unlock', {
+                    method: 'POST',
+                    body: formData,
+                });
+        
+                const data = await response.json();
+                
+                if (data.success) {
+                    unlockForm.style.display = 'none';
+                    vaultContent.style.display = 'block';
+                    sharingRow.style.display = 'block';
+                    loadVaultData();
+                } else {
+                    alert(data.message);
+                }
+            });
+        
+            lockButton.addEventListener('click', async () => {
+                const response = await fetch('/vault/lock', {
+                    method: 'POST',
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    vaultContent.style.display = 'none';
+                    unlockForm.style.display = 'block';
+                    vaultItems.innerHTML = '';
+                    sharingRow.style.display = 'none';
+                } else {
+                    alert(data.message);
+                }
+            });
+        
+            async function loadVaultData() {
+                const response = await fetch('/vault/data');
+                const items = await response.json();
+
+                vaultItems.innerHTML = '';
+
+                items.forEach(item => {
+                    const cardContainerDiv = document.createElement('div');
+                    cardContainerDiv.className = 'col-md-3';
+
+                    const cardDiv = document.createElement('div');
+                    cardDiv.className = 'card mb-4';
+                    cardDiv.innerHTML = `
+                        <div class="card-header"><span class="item-title">${item.vaulttitle}</span></div>
+                        <div class="card-body">
+                            <p><strong>Username:</strong> <span class="item-username">${item.vaultusername}</span></p>
+                            <p><strong>Password:</strong> <span class="item-password">${item.vaultpassword}</span></p>
+                            <a href="#" class="card-link edit-link" data-id="${item.itemid}">Edit</a>
+                            <a href="#" class="card-link share-link" data-id="${item.sharekey}">Share</a>
+                            <a href="#" class="card-link delete-link" data-id="${item.itemid}">Delete</a>
+                        </div>`;
+                    cardContainerDiv.appendChild(cardDiv);
+                    vaultItems.appendChild(cardContainerDiv);
+                });
+
+                // edit modal
+                document.querySelectorAll('.edit-link').forEach(link => {
+                    link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    
+                    const itemId = e.target.getAttribute('data-id');
+                    const cardDiv = e.target.closest('.card');
+                    const itemTitleElement = cardDiv.querySelector('.item-title');
+                    const itemUsernameElement = cardDiv.querySelector('.item-username');
+                    const itemPasswordElement = cardDiv.querySelector('.item-password');
+
+                    console.log("itemTitleElement", itemTitleElement);
+                    console.log("itemUsernameElement", itemUsernameElement);
+                    console.log("itemPasswordElement", itemPasswordElement);
+
+                    const itemTitle = itemTitleElement ? itemTitleElement.innerText : null;
+                    const itemUsername = itemUsernameElement ? itemUsernameElement.innerText : null;
+                    const itemPassword = itemPasswordElement ? itemPasswordElement.innerText : null;
+
+                    
+                    // populate the edit modal fields
+                    document.getElementById('editItemId').value = itemId;
+                    document.getElementById('editVaultTitle').value = itemTitle;
+                    document.getElementById('editVaultUsername').value = itemUsername;
+                    document.getElementById('editVaultPassword').value = itemPassword;
+
+                    // show the modal
+                    const editModal = new bootstrap.Modal(document.getElementById('editVaultItemModal'));
+                    editModal.show();
+                    });
+                });
+
+                // edit submit
+                document.getElementById('editVaultItemForm').addEventListener('submit', function(e) {
+                    e.preventDefault();
+
+                    const formData = new FormData(e.target);
+                    const jsonData = {};
+
+                    formData.forEach((value, key) => {
+                        jsonData[key] = value;
+                    });
+
+                    const itemId = document.getElementById('editItemId').value;
+
+                    fetch(`/vault/edit/${itemId}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(jsonData)
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if(data.success) {
+                            alert(data.message);
+                            window.location.href = '/vault';
+                        } else {
+                            alert(data.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('An error occurred while updating the item.');
+                    });
+                });
+
+                // share
+                document.querySelectorAll('.share-link').forEach(link => {
+                    link.addEventListener('click', (e) => {
+                    e.preventDefault();
+
+                    const itemId = e.target.getAttribute('data-id');
+                    //const shareURL = window.location.origin + '/share/' + itemId;
+                    const shareURL = itemId;
+                    
+                    // populate a share modal with the URL
+                    const shareModalBody = document.querySelector('#shareModal .modal-body');
+                    shareModalBody.innerText = 'Share this code with someone to let them add a copy of this entry to their vault: ' + shareURL;
+
+                    // show the share modal
+                    const shareModal = new bootstrap.Modal(document.getElementById('shareModal'));
+                    shareModal.show();
+                    });
+                });
+
+                // delete
+                document.querySelectorAll('.delete-link').forEach(link => {
+                    link.addEventListener('click', (e) => {
+                    e.preventDefault();
+
+                    const itemId = e.target.getAttribute('data-id');
+
+                    fetch(`/vault/delete/${itemId}`, {
+                        method: 'DELETE'
+                    })
+                    .then(response => {
+                        if(response.ok) {
+                        window.location.href = '/vault';
+                        } else {
+                        console.error('Failed to delete item');
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+                    });
+                });
+
+            }
+            addVaultItemButton.addEventListener('click', async () => {
+                const title = document.getElementById('newVaultTitle').value;
+                const username = document.getElementById('newVaultUsername').value;
+                const password = document.getElementById('newVaultPassword').value;
+
+                const response = await fetch('/vault/add', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        vaulttitle: title,
+                        vaultusername: username,
+                        vaultpassword: password
+                    }),
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    loadVaultData();
+                    document.getElementById('newVaultTitle').value = '';
+                    document.getElementById('newVaultUsername').value = '';
+                    document.getElementById('newVaultPassword').value = '';
+                } else {
+                    alert(data.message);
+                }
+            });
+        
+            if (vaultContent.style.display !== 'none') {
+                loadVaultData();
+            }
+        });
+
+        document.getElementById('copyToClipboard').addEventListener('click', () => {
+            const shareURL = document.getElementById('shareURL').innerText;
+            const textArea = document.createElement('textarea');
+            textArea.value = shareURL;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+        });
+
+        // handle the add shared item form
+        document.querySelector('#addSharedItemForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const sharedKey = document.getElementById('sharedKey').value;
+            const numericRegex = /^\d+$/;
+            
+            if (sharedKey && numericRegex.test(sharedKey)) {
+                try {
+                    const response = await fetch(`/share/${sharedKey}`);
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        alert('Item added successfully to your vault.');
+                        window.location.href = '/vault';
+                    } else {
+                        alert(data.message || 'Failed to add shared item.');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('An error occurred while adding the shared item.');
+                }
+            } else {
+                alert('Please enter a valid key.');
+            }
+        });
+    </script>  
+
+</body>
+
+</html>
