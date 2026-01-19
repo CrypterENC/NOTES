@@ -521,36 +521,48 @@ The account update endpoint (`POST /account/update`) lacks CSRF protection. An a
 
 ---
 
-## Finding 5: Weak Rate Limiting - Login Endpoint
+## Finding 5: Rate Limit Headers Present but Not Enforced - Login Endpoint
 
-**Severity:** MEDIUM  
+**Severity:** LOW  
 **Status:** CONFIRMED
 
 ### Description
-The login endpoint allows approximately 50 requests before rate limiting is enforced. This enables brute force attacks against user accounts with minimal delay.
+The login endpoint includes rate limiting headers (X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset) indicating a limit of 50 requests, but does not enforce the limits. All requests return HTTP 200 OK regardless of request count, enabling unlimited brute force attacks against user accounts.
 
 ### Vulnerability Details
 - **Endpoint:** POST /login
-- **Rate Limit:** ~50 requests allowed
-- **Response Code:** HTTP 429 after limit exceeded
+- **Headers Present:** X-RateLimit-Limit: 50, X-RateLimit-Remaining, X-RateLimit-Reset
+- **Enforcement:** None - no 429 responses observed
+- **Impact:** Unlimited login attempts possible
 
 ### Proof of Concept
 
-```bash
-# Rapid login attempts
-for i in {1..60}; do
-  curl -X POST http://10.0.0.10/login \
-    -H "Content-Type: application/json" \
-    -d '{"username":"testuser1","password":"wrongpassword'$i'"}'
-done
+Use Burp Intruder for POST /login with 100+ payloads on password field (same session cookie).
+
+**Example Response (50th request):**
+```
+HTTP/1.1 200 OK
+X-RateLimit-Limit: 50
+X-RateLimit-Remaining: 42
+X-RateLimit-Reset: 1768859253
+{"message":"Invalid credentials.","success":false}
 ```
 
-**Result:** Requests 1-50 processed, requests 51+ return HTTP 429
+**Example Response (100th request):**
+```
+HTTP/1.1 200 OK
+X-RateLimit-Limit: 50
+X-RateLimit-Remaining: 43
+X-RateLimit-Reset: 1768859417
+{"message":"Invalid credentials.","success":false}
+```
+
+All requests return 200 OK with decreasing Remaining count, but no blocking occurs.
 
 ### Impact
-- Brute force attacks possible with 50 attempts per session
-- Weak password accounts vulnerable to compromise
-- No account lockout after failed attempts
+- Unlimited brute force attacks possible
+- Weak password accounts remain vulnerable
+- Rate limit headers provide false sense of security
 
 ### Remediation
 
