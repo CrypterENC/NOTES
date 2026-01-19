@@ -6,3 +6,5 @@
 ![[attacker editing his own vault item.png]]
 
 ![[edit request captured for attacker item.png]]
+
+![[attacker successfully editing traget users item num.png]]
