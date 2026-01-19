@@ -266,7 +266,7 @@ curl -X POST http://10.0.0.10/vault/add \
 
 **Recreation Steps:**
 
-**Step 1:** Know the Vault ID of another user (Target User)
+**Step 1:** Know the Vault ID of another user (Target User), then got to vault and edit the item to get the item id.
 
 1. Login to the application with valid credentials.
 2. Navigate to the vault page (/vault).
