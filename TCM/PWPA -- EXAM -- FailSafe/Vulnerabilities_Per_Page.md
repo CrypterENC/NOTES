@@ -65,3 +65,22 @@ curl -X POST http://10.0.0.10/register \
   -d '{"username":"weakpassuser123","password":"1"}'
 
 ============================================================
+
+That's 50 points. You need 25 more points from the list. Options:
+
+Stored XSS - Already tested negative
+Command Injection - Not tested
+Template Injection - Already tested negative (SSTI)
+XXE - Not tested
+BOLA - Overlaps with IDOR
+BFLA - Not fully tested
+SSRF - Already tested negative
+Broken Access Control - Overlaps with IDOR
+Broken Authentication - Not tested
+Open Redirect - Already tested negative
+Should I test the untested ones (Command Injection, XXE, Broken Authentication, BFLA) to find a third 25-point vulnerability?
+
+============================================================    
+
+Test Command Injection.
+
