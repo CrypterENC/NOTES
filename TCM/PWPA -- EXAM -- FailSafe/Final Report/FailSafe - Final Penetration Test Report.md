@@ -743,17 +743,23 @@ csrfhacked123           [Status: 200, Size: 43, Words: 2, Lines: 1, Duration: 12
 ---
 # MEDIUM PRIORITY FINDINGS (Weaknesses)
 
-## Finding 7: Weak Password Validation
+## Finding 7: Weak Password Validation - No Complexity Enforcement on Password Change
 
 **Severity:** MEDIUM  
 **Status:** CONFIRMED
 
 ### Description
-The application accepts extremely weak passwords including single characters ("1", "a") and does not enforce minimum complexity requirements.
+The password change endpoint (`POST /account/update`) implements flawed validation logic. While it correctly validates that the current password matches before allowing an update, it fails to enforce password complexity requirements on the new password. This allows users to set extremely weak passwords (single characters like "1") without any complexity validation.
+
+### Vulnerability Details
+- **Endpoint:** POST /account/update
+- **Issue:** No complexity validation on new password; only checks if current and new passwords match
+- **Authentication Required:** Yes (session-based)
+- **Impact:** Users can set trivially weak passwords despite authentication
 
 ### Proof of Concept
 
-**Request (Weak Password Update):**
+**Scenario 1: Different passwords (current ≠ new)**
 ```bash
 curl -X POST http://10.0.0.10/account/update \
   -H "Cookie: connect.sid=[session]" \
@@ -766,13 +772,61 @@ curl -X POST http://10.0.0.10/account/update \
 {"success":true,"message":"Account password updated successfully!"}
 ```
 
-**Analysis:** Password successfully changed to single character "1". No complexity validation enforced.
+**Scenario 2: Same weak password (current = new)**
+```bash
+curl -X POST http://10.0.0.10/account/update \
+  -H "Cookie: connect.sid=[session]" \
+  -H "Content-Type: application/json" \
+  -d '{"password":"1","updatedPassword":"1","updateField":"account"}'
+```
+
+**Response:**
+```json
+{"success":true,"message":"Account password updated successfully!"}
+```
+
+**Analysis:** Both scenarios succeed. The endpoint only validates that current password matches, never enforcing complexity on the new password. Single-character passwords are accepted without any validation.
+
+### Impact
+- Users can set trivially weak passwords (single characters)
+- Accounts become vulnerable to brute force attacks
+- Security posture degraded by poor password policy enforcement
+- Inconsistent security controls between registration and password change
+
+### CVSS v3.1 Score
+**Score:** 5.3 (Medium)  
+**Vector:** CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:N/I:L/A:N
 
 ### Remediation
-- Minimum 8 characters
-- Require uppercase, lowercase, numbers, special characters
-- Reject common passwords (dictionary check)
-- Implement password strength meter
+
+1. **Enforce Password Complexity on Update:**
+   ```javascript
+   app.post('/account/update', (req, res) => {
+     // Verify current password
+     if (!verifyPassword(req.body.password, user.password)) {
+       return res.status(400).json({ success: false, message: "Current password incorrect" });
+     }
+     
+     // Validate new password complexity
+     if (!isStrongPassword(req.body.updatedPassword)) {
+       return res.status(400).json({ success: false, message: "New password does not meet complexity requirements" });
+     }
+     
+     // Update password
+     updatePassword(user.id, req.body.updatedPassword);
+   });
+   ```
+
+2. **Implement Consistent Password Policy:**
+   - Apply same complexity rules to registration and password change
+   - Minimum 8 characters, uppercase, lowercase, numbers, special characters
+
+3. **Clear Error Messages:**
+   - Distinguish between "Current password incorrect" and "New password too weak"
+
+4. **Add Password Strength Validation:**
+   - Client-side validation for immediate feedback
+   - Server-side validation for security
 
 ---
 
@@ -780,26 +834,46 @@ curl -X POST http://10.0.0.10/account/update \
 
 **Recreation Steps:**
 1. Login to the application with valid credentials.
-2. Navigate to account settings or profile page.
-3. Enter current password in the "password" field.
-4. Enter a weak password like "1" in the "updatedPassword" field.
-5. Set "updateField" to "account".
-6. Submit the form.
-7. Observe success message indicating password changed.
+2. Navigate to account settings.
+3. Attempt to change password with correct current password but weak new password (e.g., "1").
+4. Use Burp Suite to intercept the POST /account/update request.
+5. Observe the request with: `{"password":"csrfhacked123","updatedPassword":"1","updateField":"account"}`
+6. Forward the request and observe success response.
+7. Verify the password was changed to the weak value by logging out and logging in with new password "1".
 
-**Screenshot 1:** Account update form accepting weak password
+**Screenshot 1:** Account update form with weak password attempt
 
-**Screenshot 2:** Successful password change response
+**Screenshot 2:** Burp intercept showing password change request with weak password
+
+**Screenshot 3:** Successful response accepting weak password
+
+**Screenshot 4:** Login with new weak password "1" succeeds
 
 **Command Output:**
 
 ```
+# Scenario 1: Change from strong to weak password
 curl -X POST http://10.0.0.10/account/update \
-  -H "Cookie: connect.sid=[session]" \
+  -H "Cookie: connect.sid=s%3AAChb3MR4SusoRGaXfvYVibg4Qy3T80BG.hTpIAL9ZY5c7Fno4586SMirVt6TixYHiD%2F2DtqYn%2Bj8" \
   -H "Content-Type: application/json" \
-  -d '{"password":"current","updatedPassword":"1","updateField":"account"}'
+  -d '{"password":"csrfhacked123","updatedPassword":"1","updateField":"account"}'
 
 Response: {"success":true,"message":"Account password updated successfully!"}
+
+# Scenario 2: Keep same weak password
+curl -X POST http://10.0.0.10/account/update \
+  -H "Cookie: connect.sid=s%3AAChb3MR4SusoRGaXfvYVibg4Qy3T80BG.hTpIAL9ZY5c7Fno4586SMirVt6TixYHiD%2F2DtqYn%2Bj8" \
+  -H "Content-Type: application/json" \
+  -d '{"password":"1","updatedPassword":"1","updateField":"account"}'
+
+Response: {"success":true,"message":"Account password updated successfully!"}
+
+# Subsequent login with weak password succeeds
+curl -X POST http://10.0.0.10/login \
+  -H "Content-Type: application/json" \
+  -d '{"username":"testuser","password":"1"}'
+
+Response: {"success":true,"message":"Login successful."}
 ```
 
 ---
@@ -1071,120 +1145,6 @@ Response: HTTP 400 with stack trace revealing /usr/app/node_modules/, Express ve
 ```
 
 ---
-
-## Finding 13: Lack of Security Controls - Password Change Logic Flaw
-
-**Severity:** MEDIUM  
-**Status:** CONFIRMED
-
-### Description
-The password change endpoint implements flawed validation logic. While it correctly validates that the current password matches before allowing an update, it fails to enforce password complexity requirements on the new password. Additionally, the error message "Passwords do not match" is misleading when the actual issue is weak password validation.
-
-### Vulnerability Details
-- **Endpoint:** POST /account/update
-- **Issue:** No complexity validation on new password after current password verification
-- **Authentication Required:** Yes (session-based)
-- **Impact:** Users can set extremely weak passwords despite authentication
-
-### Proof of Concept
-
-**Request (Attempting to set weak password):**
-```bash
-curl -X POST http://10.0.0.10/account/update \
-  -H "Cookie: connect.sid=[session]" \
-  -H "Content-Type: application/json" \
-  -d '{"password":"csrfhacked123","updatedPassword":"1","updateField":"account"}'
-```
-
-**Response (Success):**
-```json
-{"success":true,"message":"Account password updated successfully!"}
-```
-
-**Analysis:** Despite providing correct current password and attempting to set single-character password "1", the application accepts it without enforcing any complexity requirements.
-
-### Impact
-- Users can set trivially weak passwords
-- Accounts become vulnerable to brute force attacks
-- Security posture degraded by poor password policy enforcement
-- Inconsistent security controls between registration and password change
-
-### CVSS v3.1 Score
-**Score:** 4.3 (Medium)  
-**Vector:** CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:N/I:L/A:N
-
-### Remediation
-
-1. **Enforce Password Complexity on Update:**
-   ```javascript
-   app.post('/account/update', (req, res) => {
-     // Verify current password
-     if (!verifyPassword(req.body.password, user.password)) {
-       return res.status(400).json({ success: false, message: "Current password incorrect" });
-     }
-     
-     // Validate new password complexity
-     if (!isStrongPassword(req.body.updatedPassword)) {
-       return res.status(400).json({ success: false, message: "New password does not meet complexity requirements" });
-     }
-     
-     // Update password
-     updatePassword(user.id, req.body.updatedPassword);
-   });
-   ```
-
-2. **Implement Consistent Password Policy:**
-   - Apply same complexity rules to registration and password change
-   - Minimum 8 characters, uppercase, lowercase, numbers, special characters
-
-3. **Clear Error Messages:**
-   - Distinguish between "Current password incorrect" and "New password too weak"
-
-4. **Add Password Strength Validation:**
-   - Client-side validation for immediate feedback
-   - Server-side validation for security
-
----
-
-#### Screenshots and Reproduction Steps
-
-**Recreation Steps:**
-1. Login to the application with valid credentials.
-2. Navigate to account settings.
-3. Attempt to change password with correct current password but weak new password (e.g., "1").
-4. Use Burp Suite to intercept the POST /account/update request.
-5. Observe the request with: `{"password":"csrfhacked123","updatedPassword":"1","updateField":"account"}`
-6. Forward the request and observe success response.
-7. Verify the password was changed to the weak value by logging out and logging in with new password "1".
-
-**Screenshot 1:** Account update form with weak password attempt
-
-**Screenshot 2:** Burp intercept showing password change request
-
-**Screenshot 3:** Successful response accepting weak password
-
-**Screenshot 4:** Login with new weak password "1" succeeds
-
-**Command Output:**
-
-```
-curl -X POST http://10.0.0.10/account/update \
-  -H "Cookie: connect.sid=s%3AAChb3MR4SusoRGaXfvYVibg4Qy3T80BG.hTpIAL9ZY5c7Fno4586SMirVt6TixYHiD%2F2DtqYn%2Bj8" \
-  -H "Content-Type: application/json" \
-  -d '{"password":"csrfhacked123","updatedPassword":"1","updateField":"account"}'
-
-Response: {"success":true,"message":"Account password updated successfully!"}
-
-# Subsequent login with weak password succeeds
-curl -X POST http://10.0.0.10/login \
-  -H "Content-Type: application/json" \
-  -d '{"username":"testuser","password":"1"}'
-
-Response: {"success":true,"message":"Login successful."}
-```
-
----
-
 
 # Testing Coverage
 
