@@ -752,14 +752,21 @@ csrfhacked123           [Status: 200, Size: 43, Words: 2, Lines: 1, Duration: 12
 The application accepts extremely weak passwords including single characters ("1", "a") and does not enforce minimum complexity requirements.
 
 ### Proof of Concept
+
+**Request (Weak Password Update):**
 ```bash
 curl -X POST http://10.0.0.10/account/update \
   -H "Cookie: connect.sid=[session]" \
   -H "Content-Type: application/json" \
-  -d '{"password":"current","updatedPassword":"1","updateField":"account"}'
+  -d '{"password":"csrfhacked123","updatedPassword":"1","updateField":"account"}'
 ```
 
-**Response:** `{"success":true,"message":"Account password updated successfully!"}`
+**Response:**
+```json
+{"success":true,"message":"Account password updated successfully!"}
+```
+
+**Analysis:** Password successfully changed to single character "1". No complexity validation enforced.
 
 ### Remediation
 - Minimum 8 characters
