@@ -488,6 +488,15 @@ The account update endpoint (`POST /account/update`) lacks CSRF protection. An a
 
 #### Screenshots and Reproduction Steps
 
+**Recreation Steps:**
+1. Login as victim user with known credentials.
+2. Create a malicious HTML page with the CSRF form (copy the PoC code below into csrf_test.html).
+3. Open the malicious HTML page in the victim's browser session (or serve it on a local server).
+4. Click the "Click Me" button to submit the form.
+5. Use Burp Proxy to intercept the POST /account/update request.
+6. Observe the request lacks CSRF protection and is sent automatically.
+7. Verify the victim's password is changed by attempting login with the new password.
+
 **Screenshot 1:** Malicious CSRF HTML page
 
 **Screenshot 2:** Victim clicking the button
@@ -565,6 +574,13 @@ done
 
 #### Screenshots and Reproduction Steps
 
+**Recreation Steps:**
+1. Setup Burp Suite Intruder for POST /login endpoint.
+2. Configure intruder payload on the password field with numbers 1 to 60 (e.g., wrongpass1, wrongpass2, ...).
+3. Set intruder to send requests sequentially.
+4. Start the attack with 60 requests.
+5. Observe responses: first 50 return 200 OK, requests 51+ return 429 Too Many Requests.
+
 **Screenshot 1:** Burp Intruder setup for brute force login attempts
 
 **Screenshot 2:** First 50 requests succeeding (200 responses)
@@ -615,6 +631,15 @@ curl -X POST http://10.0.0.10/account/update \
 
 #### Screenshots and Reproduction Steps
 
+**Recreation Steps:**
+1. Login to the application with valid credentials.
+2. Navigate to account settings or profile page.
+3. Enter current password in the "password" field.
+4. Enter a weak password like "1" in the "updatedPassword" field.
+5. Set "updateField" to "account".
+6. Submit the form.
+7. Observe success message indicating password changed.
+
 **Screenshot 1:** Account update form accepting weak password
 
 **Screenshot 2:** Successful password change response
@@ -654,6 +679,13 @@ alert(data.message); // Unsanitized server response
 ---
 
 #### Screenshots and Reproduction Steps
+
+**Recreation Steps:**
+1. Open browser developer tools (F12) to monitor JavaScript execution.
+2. Attempt login with malformed JSON, e.g., missing quote in password field.
+3. Submit the form.
+4. Observe the alert popup displaying the server error message unsanitized.
+5. Inspect the JavaScript code in dev tools to see `alert(data.message)` usage.
 
 **Screenshot 1:** JavaScript code using alert(data.message)
 
@@ -703,6 +735,12 @@ app.use((req, res, next) => {
 
 #### Screenshots and Reproduction Steps
 
+**Recreation Steps:**
+1. Send a GET request to the homepage or any endpoint using curl or Burp.
+2. Inspect the HTTP response headers.
+3. Note the absence of security headers like X-Frame-Options, X-Content-Type-Options, Content-Security-Policy, etc.
+4. Use Burp Suite to analyze the headers for missing protections.
+
 **Screenshot 1:** HTTP response headers showing missing security headers
 
 **Screenshot 2:** Burp response headers analysis
@@ -733,6 +771,13 @@ Passwords are submitted over HTTP (not HTTPS) in the test environment, exposing 
 ---
 
 #### Screenshots and Reproduction Steps
+
+**Recreation Steps:**
+1. Ensure the application is accessed over HTTP (not HTTPS).
+2. Login with valid username and password.
+3. Use Burp Proxy or Wireshark to capture the POST /login request.
+4. Inspect the request body to see the password submitted in cleartext JSON.
+5. Note the lack of encryption exposing credentials to network sniffing.
 
 **Screenshot 1:** Login request over HTTP showing cleartext password
 
@@ -768,6 +813,13 @@ Vault item fields (title, username, password) accept any input without validatio
 ---
 
 #### Screenshots and Reproduction Steps
+
+**Recreation Steps:**
+1. Login to the application.
+2. Navigate to vault and click "Add Item".
+3. Enter data with special characters or potential XSS payloads, e.g., title: "<script>alert(1)</script>".
+4. Submit the form.
+5. View the vault items to see the data stored without validation or sanitization.
 
 **Screenshot 1:** Vault add form accepting any input
 
@@ -848,6 +900,12 @@ curl -X POST http://10.0.0.10/login \
 ---
 
 #### Screenshots and Reproduction Steps
+
+**Recreation Steps:**
+1. Send a POST request to /login or /register with malformed JSON, e.g., missing quote in password.
+2. Use curl or Burp to send the request.
+3. Observe the HTTP 400 response containing full stack trace.
+4. Inspect the response body for exposed paths like /usr/app/node_modules/, Express version, etc.
 
 **Screenshot 1:** Malformed JSON request causing error
 
