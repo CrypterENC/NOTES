@@ -172,9 +172,26 @@ curl -X POST http://10.0.0.10/register \
 
 #### Screenshots and Reproduction Steps
 
-**Screenshot 1:** SQL injection payload in registration form (username field)
+**Recreation Steps:**
+1. Navigate to http://10.0.0.10 (homepage).
+2. Click "Sign Up" button to open registration modal.
+3. In username field, enter: `' OR '1'='1`
+4. In password field, enter: `Password123!`
+5. Click "Sign Up" button.
+6. Observe success alert: "Registration successful!"
+7. Click "Log In" button.
+8. Enter username: `' OR '1'='1` and password: `Password123!`
+9. Click "Log In" - should redirect to /vault.
 
-**Screenshot 2:** Successful registration response showing account created
+**Step 1 Screenshot:** Registration modal with SQL payload in username field
+
+**Step 2 Screenshot:** Clicking Sign Up button
+
+**Step 3 Screenshot:** Success alert message
+
+**Step 4 Screenshot:** Login modal with created account
+
+**Step 5 Screenshot:** Successful login redirect to vault page
 
 **Command Output:**
 
