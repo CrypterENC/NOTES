@@ -4,6 +4,7 @@
 
 ![[Successful login response with rate limit headers still present.png]]
 
+-  Vault Brute forcing
 
 ![[vault brute forcing.png]]
 
