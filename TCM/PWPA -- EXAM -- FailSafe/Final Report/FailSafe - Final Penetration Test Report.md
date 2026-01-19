@@ -521,19 +521,19 @@ The account update endpoint (`POST /account/update`) lacks CSRF protection. An a
 
 ---
 
-## Finding 5: Rate Limit Headers Present but Not Enforced - Login Endpoint
+## Finding 5: Rate Limit Headers Present but Not Enforced - Login & Vault Unlock Endpoints
 
 **Severity:** MEDIUM  
 **Status:** CONFIRMED
 
 ### Description
-The login endpoint includes rate limiting headers (X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset) but does not enforce the limits. All requests return HTTP 200 OK regardless of request count, enabling unlimited brute force attacks against user accounts.
+The login and vault unlock endpoints include rate limiting headers (X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset) but do not enforce the limits. All requests return HTTP 200 OK regardless of request count, enabling unlimited brute force attacks against user accounts and vault passwords.
 
 ### Vulnerability Details
-- **Endpoint:** POST /login
+- **Endpoints:** POST /login, POST /vault/unlock
 - **Headers Present:** X-RateLimit-Limit: 50, X-RateLimit-Remaining, X-RateLimit-Reset
 - **Enforcement:** None - no 429 responses observed
-- **Impact:** Unlimited login attempts possible
+- **Impact:** Unlimited login and vault password brute force possible
 
 ### Proof of Concept
 
@@ -582,6 +582,8 @@ X-RateLimit-Remaining: 45
 #### Screenshots and Reproduction Steps
 
 **Recreation Steps:**
+
+**Login Brute Force:**
 1. Setup Burp Suite Intruder or ffuf for POST /login endpoint.
 2. Configure payload on the password field with a wordlist of common passwords (100+ entries).
 3. Set Burp Intruder to send requests with high thread count (40+) or use ffuf with default threading.
@@ -590,23 +592,38 @@ X-RateLimit-Remaining: 45
 6. Identify successful login by response size difference (46 bytes vs 50 bytes for invalid credentials).
 7. Confirm password cracked after 101 attempts with no rate limiting enforcement.
 
+**Vault Unlock Brute Force:**
+1. Setup Burp Suite Intruder or ffuf for POST /vault/unlock endpoint.
+2. Configure payload on the password field (form-data) with a wordlist of common passwords (100+ entries).
+3. Set Burp Intruder to send requests with high thread count (40+) or use ffuf with default threading.
+4. Start the attack with the same session cookie.
+5. Monitor responses: all requests return 200 OK regardless of count.
+6. Identify successful unlock by response size difference (43 bytes vs 48 bytes for invalid credentials).
+7. Confirm vault password cracked after 101 attempts with no rate limiting enforcement.
+
 **Screenshot 1:** Burp Intruder setup for brute force login attempts
 
-**Screenshot 2:** ffuf results showing all payloads returning 200 OK
+**Screenshot 2:** ffuf results showing all login payloads returning 200 OK
 
-**Screenshot 3:** Successful password "csrfhacked123" with Size: 46 response
+**Screenshot 3:** Successful login password "csrfhacked123" with Size: 46 response
 
-**Screenshot 4:** Successful login response with rate limit headers still present
+**Screenshot 4:** ffuf results showing all vault unlock payloads returning 200 OK
+
+**Screenshot 5:** Successful vault unlock password with Size: 43 response
 
 **Command Output:**
 
 ```
+# Login Brute Force
 ffuf -request login_brute.txt -w brute_payload.txt -u http://10.0.0.10/login
-
 csrfhacked123           [Status: 200, Size: 46, Words: 2, Lines: 1, Duration: 1229ms]
 
-# All other payloads return Size: 50 (Invalid credentials)
-# Rate limit headers present but no blocking occurs
+# Vault Unlock Brute Force
+ffuf -request vault_brute.txt -w brute_payload.txt -u http://10.0.0.10/vault/unlock
+csrfhacked123           [Status: 200, Size: 43, Words: 2, Lines: 1, Duration: 1207ms]
+
+# All other payloads return Size: 50 (login) or Size: 48 (vault unlock) - Invalid credentials
+# Rate limit headers present but no blocking occurs on either endpoint
 ```
 
 ---
