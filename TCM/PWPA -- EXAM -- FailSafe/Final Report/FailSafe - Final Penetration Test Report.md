@@ -741,9 +741,6 @@ csrfhacked123           [Status: 200, Size: 43, Words: 2, Lines: 1, Duration: 12
 ```
 
 ---
-
-# MEDIUM PRIORITY FINDINGS (Weaknesses)
-
 # MEDIUM PRIORITY FINDINGS (Weaknesses)
 
 ## Finding 7: Weak Password Validation
