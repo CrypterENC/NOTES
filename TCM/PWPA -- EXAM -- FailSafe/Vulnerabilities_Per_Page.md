@@ -21,3 +21,8 @@
 - **Input Validation**: Send malformed JSON or large inputs to API endpoints.
 
 Use curl for API, browser for web vulns. Document any confirmed findings with POC.
+
+
+1. Learn it's Node.js → Try SSTI: {{7*7}}
+2. See /usr/app/ → Try LFI: ../../../../usr/app/package.json
+3. Find dependencies → Check for vulnerable versions
