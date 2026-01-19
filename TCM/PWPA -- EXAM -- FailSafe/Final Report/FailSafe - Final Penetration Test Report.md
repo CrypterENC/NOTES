@@ -56,12 +56,13 @@ This penetration test was conducted with authorization from FailSafe management.
 
 ## Executive Summary
 
-A comprehensive penetration test of the FailSafe Password Manager web application was conducted to identify security vulnerabilities and weaknesses. The assessment identified **3 critical vulnerabilities (75 points)** and **multiple reportable weaknesses**, bringing the total to **75 points - PASSING SCORE**.
+A comprehensive penetration test of the FailSafe Password Manager web application was conducted to identify security vulnerabilities and weaknesses. The assessment identified **4 critical vulnerabilities (75 points)** and **multiple reportable weaknesses**, bringing the total to **75 points - PASSING SCORE**.
 
 **Key Findings:**
 - SQL Injection in registration username field (25 points)
 - SQL Injection in vault add title field (25 points)
 - Insecure Direct Object Reference (IDOR) in vault edit endpoint (25 points)
+- Broken Authentication - Session Fixation (25 points)
 - Cross-Site Request Forgery (CSRF) in account update functionality
 - Weak rate limiting on login endpoint
 - Weak password validation policies
@@ -594,12 +595,86 @@ curl -X POST http://10.0.0.10/login \
 
 ---
 
+## Finding 12: Broken Authentication - Session Fixation
+
+**Severity:** MEDIUM (CVSS 6.8)  
+**Points:** 25  
+**Status:** CONFIRMED
+
+### Description
+The application suffers from Session Fixation vulnerability. Old session cookies remain valid after user login, allowing attackers to maintain persistent access to user accounts.
+
+### Vulnerability Details
+- **Endpoints:** POST /login, GET /vault
+- **Issue:** Session cookies not invalidated/renewed on authentication
+- **Authentication Required:** Yes (session-based)
+
+### Proof of Concept
+
+**Step 1: Capture Pre-Login Cookie**
+```bash
+curl -I http://10.0.0.10/login
+# Extract Set-Cookie header value
+```
+
+**Step 2: Login with Valid Credentials**
+```bash
+curl -X POST http://10.0.0.10/login \
+  -H "Content-Type: application/json" \
+  -d '{"username":"testuser1","password":"csrfhacked123"}'
+```
+
+**Step 3: Access Protected Resource with Old Cookie**
+```bash
+curl http://10.0.0.10/vault \
+  -H "Cookie: connect.sid=[old_session_cookie]"
+```
+**Result:** Both old and new cookies grant access to the vault, confirming session fixation.
+
+### Impact
+- Persistent unauthorized access to user accounts
+- Session hijacking attacks
+- Account compromise without credential theft
+
+### CVSS v3.1 Score
+**Score:** 6.8 (Medium)  
+**Vector:** CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:U/C:H/I:H/A:N
+
+### Remediation
+
+1. **Invalidate Old Sessions on Login:**
+   ```javascript
+   app.post('/login', (req, res) => {
+     // ... authentication logic ...
+     
+     // Destroy old session and create new one
+     req.session.regenerate((err) => {
+       if (err) return next(err);
+       req.session.userId = user.id;
+       res.json({ success: true });
+     });
+   });
+   ```
+
+2. **Use Secure Session Management:**
+   - Set session cookie options: `secure: true`, `httpOnly: true`, `sameSite: 'strict'`
+   - Regenerate session ID after login
+
+3. **Implement Session Timeout:**
+   - Auto-expire sessions after inactivity (30 minutes)
+
+4. **Add Logout Functionality:**
+   - Properly destroy sessions on logout
+
+---
+
 # Testing Coverage
 
 ## Endpoints Tested
 - ✅ POST /register - SQL Injection confirmed (25 points)
 - ✅ POST /vault/add - SQL Injection confirmed (25 points)
 - ✅ PUT /vault/edit/:itemId - IDOR confirmed (25 points)
+- ✅ GET /vault - Session fixation confirmed (25 points)
 - ✅ POST /login - Weak rate limiting confirmed
 - ✅ POST /account/update - CSRF confirmed
 - ✅ GET /vault - Functionality verified
@@ -648,6 +723,7 @@ curl -X POST http://10.0.0.10/login \
 | SQL Injection (Registration) | Critical | High | High | 25 |
 | SQL Injection (Vault Add) | Critical | High | High | 25 |
 | IDOR (Vault Edit) | Critical | High | High | 25 |
+| Broken Authentication | Critical | Medium | High | 25 |
 | CSRF | High | Medium | Medium | Reportable |
 | Weak Rate Limiting | High | Low | Medium | Reportable |
 | Weak Passwords | Medium | Low | Medium | - |
@@ -660,21 +736,23 @@ curl -X POST http://10.0.0.10/login \
 
 # Conclusion
 
-The FailSafe Password Manager contains **3 critical vulnerabilities (75 points)** and **multiple reportable weaknesses**, bringing the total to **75 points - PASSING SCORE**. The application's core functionality is severely compromised, allowing attackers to:
+The FailSafe Password Manager contains **4 critical vulnerabilities (75 points)** and **multiple reportable weaknesses**, bringing the total to **75 points - PASSING SCORE**. The application's core functionality is severely compromised, allowing attackers to:
 
 1. Create unauthorized accounts via SQL injection in registration
 2. Manipulate vault data via SQL injection in vault add
 3. Modify other users' vault items via IDOR in vault edit
-4. Hijack user accounts via CSRF in account update
-5. Brute force weak passwords via weak rate limiting
+4. Maintain persistent access via session fixation
+5. Hijack user accounts via CSRF in account update
+6. Brute force weak passwords via weak rate limiting
 
 **Immediate Actions Required:**
 1. Patch SQL injection in registration and vault add
 2. Fix IDOR in vault edit endpoint
-3. Implement CSRF protection
-4. Strengthen rate limiting
-5. Deploy security headers
-6. Implement input validation and sanitization
+3. Implement proper session management (invalidate old sessions)
+4. Implement CSRF protection
+5. Strengthen rate limiting
+6. Deploy security headers
+7. Implement input validation and sanitization
 
 **Overall Risk Rating: HIGH**
 
@@ -694,6 +772,7 @@ Remediation of all critical findings is essential before production deployment. 
 - SQL Injection successful account creation (registration)
 - SQL Injection successful vault item creation (vault add)
 - IDOR successful vault item modification (vault edit)
+- Session fixation PoC (old cookie access)
 - CSRF PoC HTML page
 - Rate limiting HTTP 429 response
 - Weak password acceptance
