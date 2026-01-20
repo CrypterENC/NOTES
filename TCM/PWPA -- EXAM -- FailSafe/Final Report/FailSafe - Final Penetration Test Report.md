@@ -1253,17 +1253,17 @@ Response: HTTP 400 with stack trace revealing /usr/app/node_modules/, Express ve
 
 | Finding | Priority | Effort | Impact | Points |
 |---------|----------|--------|--------|--------|
-| SQL Injection (Registration) | Critical | High | High | 25 |
-| SQL Injection (Vault Add) | Critical | High | High | 25 |
-| IDOR (Vault Edit) | Critical | High | High | 25 |
-| Broken Authentication | Critical | Medium | High | 25 |
-| CSRF | High | Medium | Medium | Reportable |
-| Weak Rate Limiting | High | Low | Medium | Reportable |
-| Weak Passwords | Medium | Low | Medium | - |
-| Missing Headers | Medium | Low | Medium | - |
-| Error Handling XSS | Medium | Medium | Low | - |
-| Input Validation | Low | Low | Low | - |
-| Information Disclosure | Medium | Low | Low | - |
+| 1. SQL Injection (Registration) | Critical | High | High | 25 |
+| 2. SQL Injection (Vault Add) | Critical | High | High | 25 |
+| 3. IDOR (Vault Edit/Delete) | Critical | High | High | 25 |
+| 4. Broken Authentication (Session Fixation) | Critical | Medium | High | 25 |
+| 5. CSRF (Account Update) | High | Medium | Medium | Reportable |
+| 6. Weak Rate Limiting (Login & Vault) | High | Low | Medium | Reportable |
+| 7. Weak Password Validation | Medium | Low | Medium | - |
+| 8. Missing Security Headers | Medium | Low | Medium | - |
+| 9. Cleartext Password Submission | Medium | Medium | Medium | - |
+| 10. Lack of Input Validation | Low | Low | Low | - |
+| 11. Information Disclosure (Error Messages) | Medium | Low | Low | - |
 
 ---
 
