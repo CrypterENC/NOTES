@@ -1027,13 +1027,13 @@ Passwords are submitted over HTTP (not HTTPS) in the test environment, exposing 
 **Recreation Steps:**
 1. Ensure the application is accessed over HTTP (not HTTPS).
 2. Login with valid username and password.
-3. Use Burp Proxy or Wireshark to capture the POST /login request.
+3. Use Burp Suite Proxy to intercept the POST /login request.
 4. Inspect the request body to see the password submitted in cleartext JSON.
-5. Note the lack of encryption exposing credentials to network sniffing.
+5. Note the lack of encryption exposing credentials to network interception.
 
-**Screenshot 1:** Login request over HTTP showing cleartext password
+**Screenshot 1:** Burp Suite intercept showing POST /login request over HTTP
 
-**Screenshot 2:** Network capture showing password in plain text
+**Screenshot 2:** Request body showing password in cleartext JSON
 
 **Command Output:**
 
@@ -1043,7 +1043,12 @@ curl -X POST http://10.0.0.10/login \
   -H "Content-Type: application/json" \
   -d '{"username":"test","password":"password123"}'
 
-# Wireshark capture would show password in clear text
+# Burp Suite intercept shows password in cleartext JSON over HTTP
+POST /login HTTP/1.1
+Host: 10.0.0.10
+Content-Type: application/json
+
+{"username":"test","password":"password123"}
 ```
 
 ---
