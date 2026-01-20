@@ -759,7 +759,7 @@ The password change endpoint (`POST /account/update`) implements flawed validati
 
 ### Proof of Concept
 
-**Scenario 1: Different passwords (current ≠ new)**
+**Scenario 1: Attempt with different passwords (current ≠ new) - REJECTED**
 ```bash
 curl -X POST http://10.0.0.10/account/update \
   -H "Cookie: connect.sid=[session]" \
@@ -769,10 +769,10 @@ curl -X POST http://10.0.0.10/account/update \
 
 **Response:**
 ```json
-{"success":true,"message":"Account password updated successfully!"}
+{"success":false,"message":"Passwords do not match."}
 ```
 
-**Scenario 2: Same weak password (current = new)**
+**Scenario 2: Same weak password (current = new) - ACCEPTED**
 ```bash
 curl -X POST http://10.0.0.10/account/update \
   -H "Cookie: connect.sid=[session]" \
@@ -785,7 +785,7 @@ curl -X POST http://10.0.0.10/account/update \
 {"success":true,"message":"Account password updated successfully!"}
 ```
 
-**Analysis:** Both scenarios succeed. The endpoint only validates that current password matches, never enforcing complexity on the new password. Single-character passwords are accepted without any validation.
+**Analysis:** The endpoint validates that current and new passwords match (must be identical), but never enforces complexity requirements. When both are set to the same weak password "1", the update succeeds. This allows users to maintain or set trivially weak passwords without any complexity validation.
 
 ### Impact
 - Users can set trivially weak passwords (single characters)
