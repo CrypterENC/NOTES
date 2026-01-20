@@ -846,21 +846,41 @@ curl -X POST http://10.0.0.10/account/update \
 #### Screenshots and Reproduction Steps
 
 **Recreation Steps:**
-1. Login to the application with valid credentials.
+
+**Scenario 1: Account Password - Different passwords (Rejected)**
+1. Login to the application with valid credentials (e.g., password: csrfhacked123).
 2. Navigate to account settings.
-3. Attempt to change password with correct current password but weak new password (e.g., "1").
-4. Use Burp Suite to intercept the POST /account/update request.
-5. Observe the request with: `{"password":"csrfhacked123","updatedPassword":"1","updateField":"account"}`
-6. Forward the request and observe success response.
-7. Verify the password was changed to the weak value by logging out and logging in with new password "1".
+3. Use Burp Suite to intercept POST /account/update request.
+4. Send request: `{"password":"csrfhacked123","updatedPassword":"1","updateField":"account"}`
+5. Observe error response: "Passwords do not match."
 
-**Screenshot 1:** Account update form with weak password attempt
+**Scenario 2: Account Password - Same weak password (Accepted)**
+1. Login to the application with weak password (e.g., password: 1).
+2. Navigate to account settings.
+3. Use Burp Suite to intercept POST /account/update request.
+4. Send request: `{"password":"1","updatedPassword":"1","updateField":"account"}`
+5. Observe success response: "Account password updated successfully!"
+6. Verify weak password persists by logging out and logging in with password "1".
 
-**Screenshot 2:** Burp intercept showing password change request with weak password
+**Scenario 3: Vault Password - Same weak password (Accepted)**
+1. Login to the application with valid credentials.
+2. Navigate to vault settings or password change section.
+3. Use Burp Suite to intercept POST /account/update request.
+4. Send request: `{"password":"1","updatedPassword":"1","updateField":"vault"}`
+5. Observe success response: "Vault password updated successfully!"
+6. Verify weak vault password by accessing vault with password "1".
 
-**Screenshot 3:** Successful response accepting weak password
+**Screenshot 1:** Burp intercept showing rejected password change (different passwords)
 
-**Screenshot 4:** Login with new weak password "1" succeeds
+**Screenshot 2:** Burp intercept showing accepted account password change (same weak password)
+
+**Screenshot 3:** Successful response accepting weak account password
+
+**Screenshot 4:** Burp intercept showing accepted vault password change (same weak password)
+
+**Screenshot 5:** Successful response accepting weak vault password
+
+**Screenshot 6:** Login with weak password "1" succeeds
 
 **Command Output:**
 
