@@ -887,21 +887,29 @@ curl -X POST http://10.0.0.10/account/update \
 **Command Output:**
 
 ```
-# Scenario 1: Change from strong to weak password
+# Scenario 1: Different passwords (current ≠ new) - REJECTED
 curl -X POST http://10.0.0.10/account/update \
   -H "Cookie: connect.sid=s%3AAChb3MR4SusoRGaXfvYVibg4Qy3T80BG.hTpIAL9ZY5c7Fno4586SMirVt6TixYHiD%2F2DtqYn%2Bj8" \
   -H "Content-Type: application/json" \
   -d '{"password":"csrfhacked123","updatedPassword":"1","updateField":"account"}'
 
-Response: {"success":true,"message":"Account password updated successfully!"}
+Response: {"success":false,"message":"Passwords do not match."}
 
-# Scenario 2: Keep same weak password
+# Scenario 2: Same weak password (current = new) - ACCEPTED
 curl -X POST http://10.0.0.10/account/update \
   -H "Cookie: connect.sid=s%3AAChb3MR4SusoRGaXfvYVibg4Qy3T80BG.hTpIAL9ZY5c7Fno4586SMirVt6TixYHiD%2F2DtqYn%2Bj8" \
   -H "Content-Type: application/json" \
   -d '{"password":"1","updatedPassword":"1","updateField":"account"}'
 
 Response: {"success":true,"message":"Account password updated successfully!"}
+
+# Scenario 3: Vault password with same weak password - ACCEPTED
+curl -X POST http://10.0.0.10/account/update \
+  -H "Cookie: connect.sid=s%3AAChb3MR4SusoRGaXfvYVibg4Qy3T80BG.hTpIAL9ZY5c7Fno4586SMirVt6TixYHiD%2F2DtqYn%2Bj8" \
+  -H "Content-Type: application/json" \
+  -d '{"password":"1","updatedPassword":"1","updateField":"vault"}'
+
+Response: {"success":true,"message":"Vault password updated successfully!"}
 
 # Subsequent login with weak password succeeds
 curl -X POST http://10.0.0.10/login \
