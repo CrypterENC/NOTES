@@ -787,10 +787,10 @@ curl -X POST http://10.0.0.10/account/update \
 
 **Scenario 3: Vault password reset with same weak password (current = new) - ACCEPTED**
 ```bash
-curl -X POST http://10.0.0.10/vault/unlock \
+curl -X POST http://10.0.0.10/account/update \
   -H "Cookie: connect.sid=[session]" \
-  -H "Content-Type: application/x-www-form-urlencoded" \
-  -d 'password=1&newPassword=1'
+  -H "Content-Type: application/json" \
+  -d '{"password":"1","updatedPassword":"1","updateField":"vault"}'
 ```
 
 **Response:**
