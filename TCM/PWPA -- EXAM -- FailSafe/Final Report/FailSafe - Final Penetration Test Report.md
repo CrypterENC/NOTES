@@ -1178,7 +1178,23 @@ curl -X POST http://10.0.0.10/login \
   -H "Content-Type: application/json" \
   -d '{"username":"test","password"}'
 
-Response: HTTP 400 with stack trace revealing /usr/app/node_modules/, Express version, etc.
+HTTP/1.1 400 Bad Request
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head>
+<body>
+<pre>SyntaxError: Unexpected token } in JSON at position 29<br> &nbsp; &nbsp;at JSON.parse (&lt;anonymous&gt;)<br> &nbsp; &nbsp;at parse (/usr/app/node_modules/body-parser/lib/types/json.js:92:19)<br> &nbsp; &nbsp;at /usr/app/node_modules/body-parser/lib/read.js:128:18<br> &nbsp; &nbsp;at AsyncResource.runInAsyncScope (node:async_hooks:203:9)<br> &nbsp; &nbsp;at invokeCallback (/usr/app/node_modules/raw-body/index.js:238:16)<br> &nbsp; &nbsp;at done (/usr/app/node_modules/raw-body/index.js:227:7)<br> &nbsp; &nbsp;at IncomingMessage.onEnd (/usr/app/node_modules/raw-body/index.js:287:7)<br> &nbsp; &nbsp;at IncomingMessage.emit (node:events:517:28)<br> &nbsp; &nbsp;at endReadableNT (node:internal/streams/readable:1368:12)<br> &nbsp; &nbsp;at process.processTicksToRejections (node:internal/process/task_queues:21:7)</pre>
+</body>
+</html>
+
+# Exposed Information:
+# - Internal path: /usr/app/node_modules/body-parser/lib/types/json.js
+# - Technology: Node.js, Express, body-parser
+# - Error details: Full stack trace with line numbers
+# - File structure: /usr/app/ application root
 ```
 
 ---
