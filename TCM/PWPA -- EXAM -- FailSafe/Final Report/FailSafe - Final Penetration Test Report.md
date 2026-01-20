@@ -967,7 +967,22 @@ app.use((req, res, next) => {
 ```
 curl -I http://10.0.0.10
 
-# Response headers should show absence of X-Frame-Options, X-Content-Type-Options, CSP, etc.
+HTTP/1.1 200 OK
+Date: Tue, 20 Jan 2026 00:41:35 GMT
+Content-Type: text/html; charset=utf-8
+Content-Length: 7634
+Connection: keep-alive
+X-Powered-By: Express
+ETag: W/"1dd2-KW1CYVEDzWSSo/KBW1Y8YFni+FM"
+Set-Cookie: connect.sid=s%3AREErDQ8Zd9s9_pnhjW6AIbqPPy69IrLs.oo7IEvt4d2361E9rf8SXcG7XgzXYtyo8ko0xPY2r6zM; Path=/; HttpOnly
+Cache-Control: no-cache
+
+# Missing Security Headers:
+# - X-Frame-Options: NOT PRESENT (Clickjacking protection missing)
+# - X-Content-Type-Options: NOT PRESENT (MIME type sniffing protection missing)
+# - Content-Security-Policy: NOT PRESENT (XSS/Injection protection missing)
+# - Strict-Transport-Security: NOT PRESENT (HTTPS enforcement missing)
+# - X-XSS-Protection: NOT PRESENT (Legacy XSS protection missing)
 ```
 
 ---
