@@ -1165,11 +1165,7 @@ curl -X POST http://10.0.0.10/login \
 3. Observe the HTTP 400 response containing full stack trace.
 4. Inspect the response body for exposed paths like /usr/app/node_modules/, Express version, etc.
 
-**Screenshot 1:** Malformed JSON request causing error
-
-**Screenshot 2:** HTTP 400 response with full stack trace
-
-**Screenshot 3:** Exposed internal paths and technology stack
+**Screenshot 1:** Terminal showing curl command, malformed JSON request, HTTP 400 response with full stack trace, and exposed internal paths (/usr/app/node_modules/body-parser/lib/types/json.js)
 
 **Command Output:**
 
