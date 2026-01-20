@@ -1,1 +1,3 @@
-![[Screenshot 2026-01-20 063020.png]]
+![[Vault add form accepting any input.png]]
+
+![[Stored data with no validation.png]]
