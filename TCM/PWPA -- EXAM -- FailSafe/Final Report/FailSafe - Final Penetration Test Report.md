@@ -1180,32 +1180,56 @@ Response: HTTP 400 with stack trace revealing /usr/app/node_modules/, Express ve
 # Testing Coverage
 
 ## Endpoints Tested
-- ✅ POST /register - SQL Injection confirmed (25 points)
-- ✅ POST /vault/add - SQL Injection confirmed (25 points)
-- ✅ PUT /vault/edit/:itemId - IDOR confirmed (25 points)
-- ✅ GET /vault - Session fixation confirmed (25 points)
-- ✅ POST /login - Weak rate limiting confirmed
-- ✅ POST /account/update - CSRF confirmed
-- ✅ GET /vault - Functionality verified
-- ✅ GET /api/token - Authentication tested
-- ✅ GET /api/vault/:token - IDOR tested (not exploitable)
-- ✅ GET /share/:key - Authorization tested (not exploitable)
+- ✅ POST /register - SQL Injection confirmed (Finding 1, 25 points)
+- ✅ POST /vault/add - SQL Injection confirmed (Finding 2, 25 points)
+- ✅ PUT /vault/edit/:itemId - IDOR confirmed (Finding 3, 25 points)
+- ✅ DELETE /vault/delete/:itemId - IDOR confirmed (Finding 3, 25 points)
+- ✅ GET /vault - Session fixation confirmed (Finding 4, 25 points)
+- ✅ POST /login - Weak rate limiting confirmed (Finding 6)
+- ✅ POST /vault/unlock - Weak rate limiting confirmed (Finding 6)
+- ✅ POST /account/update - CSRF confirmed (Finding 5)
+- ✅ POST /account/update - Weak password validation confirmed (Finding 7)
+- ✅ GET / - Missing security headers confirmed (Finding 8)
+- ✅ POST /login - Cleartext password submission confirmed (Finding 9)
+- ✅ POST /vault/add - Input validation weakness confirmed (Finding 10)
+- ✅ POST /login - Information disclosure confirmed (Finding 11)
+
+## Findings Summary
+- **Critical Findings:** 4 (75 points total)
+  - Finding 1: SQL Injection - Registration (25 points)
+  - Finding 2: SQL Injection - Vault Add (25 points)
+  - Finding 3: IDOR - Vault Edit/Delete (25 points)
+  - Finding 4: Broken Authentication - Session Fixation (25 points)
+
+- **High Priority Findings:** 2
+  - Finding 5: CSRF - Account Update
+  - Finding 6: Rate Limiting - Login & Vault Unlock
+
+- **Medium Priority Findings:** 5
+  - Finding 7: Weak Password Validation
+  - Finding 8: Missing Security Headers
+  - Finding 9: Cleartext Password Submission
+  - Finding 10: Lack of Input Validation
+  - Finding 11: Information Disclosure - Error Messages
 
 ## Attack Vectors Tested
-- SQL Injection (Boolean, UNION, Blind)
-- IDOR/BOLA
-- CSRF
-- XSS (Stored, Reflected)
-- Brute Force
-- Rate Limiting
-- Authentication Bypass
-- Authorization Bypass
+- ✅ SQL Injection (Boolean, UNION, Blind)
+- ✅ IDOR/BOLA (Edit and Delete endpoints)
+- ✅ CSRF (Account update endpoint)
+- ✅ Brute Force (Login and vault unlock)
+- ✅ Rate Limiting (Login and vault unlock endpoints)
+- ✅ Session Fixation (Login and vault access)
+- ✅ Weak Password Validation (Account and vault passwords)
+- ✅ Missing Security Headers (All endpoints)
+- ✅ Information Disclosure (Error messages and stack traces)
+- ✅ Input Validation (Vault items)
 
 ## Tools Used
-- curl (HTTP requests)
-- Burp Suite (Web proxy, scanning)
-- SQLMap (SQL injection detection)
+- curl (HTTP requests and header analysis)
+- Burp Suite (Web proxy, request interception, intruder)
+- ffuf (Brute force attacks)
 - Browser DevTools (Client-side analysis)
+- Wireshark (Network traffic analysis)
 
 ---
 
