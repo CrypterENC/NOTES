@@ -962,6 +962,26 @@ app.use((req, res, next) => {
 
 **Screenshot 2:** Burp response headers analysis
 
+**Request/Response Evidence:**
+
+```
+HEAD / HTTP/1.1
+Host: 10.0.0.10
+User-Agent: curl/8.17.0
+Accept: */*
+Connection: keep-alive
+
+HTTP/1.1 200 OK
+Date: Tue, 20 Jan 2026 00:43:41 GMT
+Content-Type: text/html; charset=utf-8
+Content-Length: 7634
+Connection: keep-alive
+X-Powered-By: Express
+ETag: W/"1dd2-KW1CYVEDzWSSo/KBW1Y8YFni+FM"
+Set-Cookie: connect.sid=s%3A3V-nw9UaFTN1tODfbFatJYVS6YVp5RrZ.66WmYnyoqtaGWSi1JLlLVdjmpz8Frv0GlbKCPgN2q0A; Path=/; HttpOnly
+Cache-Control: no-cache
+```
+
 **Command Output:**
 
 ```
