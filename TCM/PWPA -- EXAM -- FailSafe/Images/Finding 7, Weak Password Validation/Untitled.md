@@ -8,3 +8,9 @@
 ![[Pasted image 20260120055713.png]]
 
 ![[Pasted image 20260120055759.png]]
+
+- Scen3
+
+![[Burp intercept - POST accountupdate with same weak password (1 = 1, updateField vault).png]]
+![[Pasted image 20260120060023.png]]
+![[Pasted image 20260120060059.png]]
