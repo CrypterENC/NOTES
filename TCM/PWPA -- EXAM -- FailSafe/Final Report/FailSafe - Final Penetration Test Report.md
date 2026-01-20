@@ -1102,12 +1102,18 @@ curl -X POST http://10.0.0.10/vault/add \
 **Status:** CONFIRMED
 
 ### Description
-The application exposes internal stack traces and file paths in error responses for malformed JSON requests.
+The application exposes internal stack traces, file paths, and technology fingerprinting information in error responses for malformed JSON requests. This allows attackers to identify the technology stack and internal application structure for reconnaissance and targeted attacks.
 
 ### Vulnerability Details
 - **Endpoints:** POST /login, POST /register
 - **Trigger:** Malformed JSON in request body
 - **Response:** HTTP 400 with full stack trace
+- **Fingerprinting Information Exposed:**
+  - Node.js runtime version
+  - Express.js framework
+  - body-parser middleware version
+  - Internal file paths (/usr/app/node_modules/)
+  - Application root directory structure
 
 ### Proof of Concept
 
@@ -1123,10 +1129,12 @@ curl -X POST http://10.0.0.10/login \
 - Internal error details
 
 ### Impact
-- Attackers can fingerprint the technology stack
-- Identify vulnerable libraries and versions
-- Understand application structure for further attacks
-- Enumerate internal file paths
+- **Technology Fingerprinting:** Attackers identify Node.js, Express.js, body-parser versions
+- **Reconnaissance:** Understand application structure and internal directory layout (/usr/app/)
+- **Vulnerability Identification:** Identify specific library versions that may have known CVEs
+- **Targeted Attacks:** Use fingerprinting information to craft version-specific exploits
+- **Internal Path Disclosure:** Reveals application root and dependency locations for further reconnaissance
+- **Attack Surface Mapping:** Helps attackers understand the complete technology stack for targeted attacks
 
 ### CVSS v3.1 Score
 **Score:** 5.3 (Medium)  
