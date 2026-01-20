@@ -1,0 +1,1 @@
+![[HTTP response headers showing missing security headers.png]]
