@@ -749,13 +749,13 @@ csrfhacked123           [Status: 200, Size: 43, Words: 2, Lines: 1, Duration: 12
 **Status:** CONFIRMED
 
 ### Description
-The password change endpoint (`POST /account/update`) implements flawed validation logic. While it correctly validates that the current password matches before allowing an update, it fails to enforce password complexity requirements on the new password. This allows users to set extremely weak passwords (single characters like "1") without any complexity validation.
+The password change endpoints (`POST /account/update` for account password and vault password reset) implement flawed validation logic. While they correctly validate that the current password matches before allowing an update, they fail to enforce password complexity requirements on the new password. This allows users to set extremely weak passwords (single characters like "1") without any complexity validation on both account and vault passwords.
 
 ### Vulnerability Details
-- **Endpoint:** POST /account/update
+- **Endpoints:** POST /account/update (account password), Vault password reset (vault password)
 - **Issue:** No complexity validation on new password; only checks if current and new passwords match
 - **Authentication Required:** Yes (session-based)
-- **Impact:** Users can set trivially weak passwords despite authentication
+- **Impact:** Users can set trivially weak passwords on both account and vault despite authentication
 
 ### Proof of Concept
 
@@ -785,7 +785,20 @@ curl -X POST http://10.0.0.10/account/update \
 {"success":true,"message":"Account password updated successfully!"}
 ```
 
-**Analysis:** The endpoint validates that current and new passwords match (must be identical), but never enforces complexity requirements. When both are set to the same weak password "1", the update succeeds. This allows users to maintain or set trivially weak passwords without any complexity validation.
+**Scenario 3: Vault password reset with same weak password (current = new) - ACCEPTED**
+```bash
+curl -X POST http://10.0.0.10/vault/unlock \
+  -H "Cookie: connect.sid=[session]" \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d 'password=1&newPassword=1'
+```
+
+**Response:**
+```json
+{"success":true,"message":"Vault password updated successfully!"}
+```
+
+**Analysis:** Both account and vault password endpoints validate that current and new passwords match (must be identical), but never enforce complexity requirements. When both are set to the same weak password "1", the update succeeds on both endpoints. This allows users to maintain or set trivially weak passwords without any complexity validation on either account or vault passwords.
 
 ### Impact
 - Users can set trivially weak passwords (single characters)
