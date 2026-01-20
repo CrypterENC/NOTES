@@ -921,54 +921,7 @@ Response: {"success":true,"message":"Login successful."}
 
 ---
 
-## Finding 8: Client-Side Error Handling XSS Risk
-
-**Severity:** MEDIUM  
-**Status:** CONFIRMED
-
-### Description
-JavaScript uses `alert(data.message)` to display server responses. If the server returns unsanitized data in error messages, XSS attacks are possible.
-
-### Vulnerable Code
-```javascript
-const data = await response.json();
-alert(data.message); // Unsanitized server response
-```
-
-### Remediation
-- Sanitize all server responses
-- Use `textContent` instead of `innerHTML`
-- Implement Content Security Policy (CSP)
-
----
-
-#### Screenshots and Reproduction Steps
-
-**Recreation Steps:**
-1. Open browser developer tools (F12) to monitor JavaScript execution.
-2. Attempt login with malformed JSON, e.g., missing quote in password field.
-3. Submit the form.
-4. Observe the alert popup displaying the server error message unsanitized.
-5. Inspect the JavaScript code in dev tools to see `alert(data.message)` usage.
-
-**Screenshot 1:** JavaScript code using alert(data.message)
-
-**Screenshot 2:** Error response with unsanitized message (if applicable)
-
-**Command Output:**
-
-```
-# Trigger error by malformed request
-curl -X POST http://10.0.0.10/login \
-  -H "Content-Type: application/json" \
-  -d '{"username":"test","password"}'
-
-# If XSS possible, alert would execute <script>alert('xss')</script>
-```
-
----
-
-## Finding 9: Missing Security Headers
+## Finding 8: Missing Security Headers
 
 **Severity:** MEDIUM  
 **Status:** CONFIRMED
@@ -1019,7 +972,7 @@ curl -I http://10.0.0.10
 
 ---
 
-## Finding 10: Cleartext Password Submission
+## Finding 9: Cleartext Password Submission
 
 **Severity:** MEDIUM  
 **Status:** CONFIRMED
@@ -1060,7 +1013,7 @@ curl -X POST http://10.0.0.10/login \
 
 ---
 
-## Finding 11: Lack of Input Validation on Vault Items
+## Finding 10: Lack of Input Validation on Vault Items
 
 **Severity:** LOW  
 **Status:** CONFIRMED
@@ -1102,7 +1055,7 @@ curl -X POST http://10.0.0.10/vault/add \
 
 ---
 
-## Finding 12: Information Disclosure - Error Messages
+## Finding 11: Information Disclosure - Error Messages
 
 **Severity:** MEDIUM  
 **Status:** CONFIRMED
