@@ -1038,10 +1038,11 @@ Passwords are submitted over HTTP (not HTTPS) in the test environment, exposing 
 **Command Output:**
 
 ```
-# All requests are over HTTP
+# All requests are over HTTP (via Burp Suite proxy)
 curl -X POST http://10.0.0.10/login \
   -H "Content-Type: application/json" \
-  -d '{"username":"test","password":"password123"}'
+  -d '{"username":"test","password":"password123"}' \
+  -x 127.0.0.1:8080
 
 # Burp Suite intercept shows password in cleartext JSON over HTTP
 POST /login HTTP/1.1
