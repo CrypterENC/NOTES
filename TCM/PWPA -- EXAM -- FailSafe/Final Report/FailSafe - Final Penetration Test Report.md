@@ -870,17 +870,19 @@ curl -X POST http://10.0.0.10/account/update \
 5. Observe success response: "Vault password updated successfully!"
 6. Verify weak vault password by accessing vault with password "1".
 
-**Screenshot 1:** Burp intercept showing rejected password change (different passwords)
+**Scenario 1 Screenshots:**
+- **Screenshot 1:** Burp intercept - POST /account/update with different passwords (csrfhacked123 ≠ 1)
+- **Screenshot 2:** Error response - "Passwords do not match."
 
-**Screenshot 2:** Burp intercept showing accepted account password change (same weak password)
+**Scenario 2 Screenshots:**
+- **Screenshot 3:** Burp intercept - POST /account/update with same weak password (1 = 1, updateField: account)
+- **Screenshot 4:** Success response - "Account password updated successfully!"
+- **Screenshot 5:** Login with weak password "1" succeeds
 
-**Screenshot 3:** Successful response accepting weak account password
-
-**Screenshot 4:** Burp intercept showing accepted vault password change (same weak password)
-
-**Screenshot 5:** Successful response accepting weak vault password
-
-**Screenshot 6:** Login with weak password "1" succeeds
+**Scenario 3 Screenshots:**
+- **Screenshot 6:** Burp intercept - POST /account/update with same weak password (1 = 1, updateField: vault)
+- **Screenshot 7:** Success response - "Vault password updated successfully!"
+- **Screenshot 8:** Vault access with weak password "1" succeeds
 
 **Command Output:**
 
