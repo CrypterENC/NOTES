@@ -112,7 +112,7 @@ External Penetration Test | http://10.0.0.10 (FailSafe Password Manager web appl
 
 Scope Exclusions
 
-Per client request, TCMS did not perform any Denial of Service attacks during testing. Infrastructure and underlying OS, third-party libraries and dependencies, and social engineering were also excluded.
+Per client request, the assessor did not perform any Denial of Service attacks during testing. Infrastructure and underlying OS, third-party libraries and dependencies, and social engineering were also excluded.
 
 ---
 
