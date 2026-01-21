@@ -4,9 +4,9 @@
 **Business Confidential**
 
 **Date:** January 18, 2026  
-**Project:** PWPA-2026-001  
+**Project:** PWPA
 **Client:** FailSafe Password Manager  
-**Assessor:** TCM Security, Inc.  
+**Assessor:** Nittin Nobby Mathew 
 **Version:** 1.0 (Final)
 
 ---
@@ -31,76 +31,88 @@
 
 ## Confidentiality Statement
 
-This document is the exclusive property of FailSafe and TCM Security, Inc. This document contains proprietary and confidential information. Duplication, redistribution, or use, in whole or in part, in any form, requires consent of both parties.
+This document is the exclusive property of FailSafe. This document contains proprietary and confidential information. Duplication, redistribution, or use, in whole or in part, in any form, requires consent of FailSafe management.
 
-TCM Security may share this document with auditors under non-disclosure agreements to demonstrate penetration test requirement compliance.
+This document may be shared with auditors under non-disclosure agreements to demonstrate penetration test requirement compliance.
 
 ---
 
 ## Disclaimer
 
-This penetration test was conducted with authorization from FailSafe management. The findings and recommendations contained in this report are based on the scope of work agreed upon. TCM Security is not responsible for any damages resulting from the implementation or non-implementation of the recommendations provided in this report.
+This penetration test was conducted with authorization from FailSafe management. The findings and recommendations contained in this report are based on the scope of work agreed upon. The assessor is not responsible for any damages resulting from the implementation or non-implementation of the recommendations provided in this report.
 
 ---
 
 ## Assessment Overview
 
-**Engagement Type:** Web Application Penetration Test  
-**Target Application:** FailSafe Password Manager v2023  
-**Target URL:** http://10.0.0.10  
-**Assessment Period:** January 18, 2026  
-**Duration:** Full day assessment  
-**Scope:** Web application functionality (login, registration, account management, vault, API)
+From January 18, 2026 to January 22, 2026, FailSafe engaged Nittin Nobby Mathew to evaluate the security posture of its web application compared to current industry best practices that included a comprehensive penetration test. All testing performed is based on the NIST SP 800-115 Technical Guide to Information Security Testing and Assessment, OWASP Testing Guide (v4), and customized testing frameworks.
+
+Phases of penetration testing activities include the following:
+•	Planning – Customer goals are gathered and rules of engagement obtained.
+•	Discovery – Perform scanning and enumeration to identify potential vulnerabilities, weak areas, and exploits.
+•	Attack – Confirm potential vulnerabilities through exploitation and perform additional discovery upon new access.
+•	Reporting – Document all found vulnerabilities and exploits, failed attempts, and company strengths and weaknesses.
 
 ---
 
 ## Executive Summary
 
-A comprehensive penetration test of the FailSafe Password Manager web application was conducted to identify security vulnerabilities and weaknesses. The assessment identified **4 critical vulnerabilities (75 points)** and **multiple reportable weaknesses**, bringing the total to **75 points - PASSING SCORE**.
+A comprehensive penetration test of the FailSafe Password Manager web application was conducted to identify security vulnerabilities and weaknesses. The assessment identified **4 critical vulnerabilities** and **multiple reportable weaknesses**.
 
 **Key Findings:**
-- SQL Injection in registration username field (25 points)
-- SQL Injection in vault add title field (25 points)
-- Insecure Direct Object Reference (IDOR) in vault edit endpoint (25 points)
-- Broken Authentication - Session Fixation (25 points)
+- SQL Injection in registration username field
+- SQL Injection in vault add title field
+- Insecure Direct Object Reference (IDOR) in vault edit endpoint
+- Broken Authentication - Session Fixation
 - Cross-Site Request Forgery (CSRF) in account update functionality
-- Weak rate limiting on login endpoint
+- Weak rate limiting on login and vault unlock endpoints
 - Weak password validation policies
-- Client-side error handling XSS risks
 - Missing security headers
 - Cleartext password submission over HTTP
+- Information disclosure through error messages
 
 **Risk Level:** HIGH - Immediate remediation required
+
+---
+
+## Attack Summary
+
+The following table describes how vulnerabilities were identified and exploited during the penetration test to demonstrate their impact on the FailSafe application:
+
+Step | Action | Recommendation
+---- | ------ | -------------
+1 | Exploited SQL Injection in registration endpoint to create accounts with malicious usernames | Implement parameterized queries and input validation to prevent SQL injection attacks
+2 | Used SQL Injection in vault add endpoint to manipulate stored data | Use ORM frameworks with automatic parameterization and sanitize all user inputs
+3 | Leveraged IDOR vulnerability in vault edit/delete endpoints to access other users' data | Implement proper authorization checks and object-level access controls
+4 | Exploited Session Fixation vulnerability to maintain persistent unauthorized access | Invalidate and regenerate session cookies on authentication and implement secure session management
+5 | Performed CSRF attack on account update endpoint to force password changes | Implement CSRF tokens and validate requests to prevent cross-site request forgery
+6 | Bypassed weak rate limiting on login and vault unlock endpoints for brute force attacks | Implement proper rate limiting, account lockouts, and multi-factor authentication
 
 ---
 
 ## Finding Severity Ratings
 
 | Severity | CVSS Score | Description |
-|----------|-----------|-------------|
-| Critical | 9.0-10.0 | Immediate exploitation risk, system compromise |
-| High | 7.0-8.9 | Significant impact, exploitation likely |
-| Medium | 4.0-6.9 | Moderate impact, exploitation possible |
-| Low | 0.1-3.9 | Minor impact, limited exploitation |
+|:---------|:----------:|:-----------|
+| **Critical** | 9.0-10.0 | Immediate exploitation risk, system compromise |
+| **High** | 7.0-8.9 | Significant impact, exploitation likely |
+| **Medium** | 4.0-6.9 | Moderate impact, exploitation possible |
+| **Low** | 0.1-3.9 | Minor impact, limited exploitation |
+| **Informational** | N/A | No vulnerability exists. Additional information is provided regarding items noticed during testing, strong controls, and additional documentation.
 
 ---
 
 ## Scope
 
-**In Scope:**
-- Registration endpoint (/register)
-- Login endpoint (/login)
-- Account management (/account)
-- Vault functionality (/vault)
-- API endpoints (/api/token, /api/vault)
-- Session management
-- Authentication mechanisms
+Assessment | Details
+--- | ---
+External Penetration Test | http://10.0.0.10 (FailSafe Password Manager web application)
 
-**Out of Scope:**
-- Infrastructure and underlying OS
-- Denial of Service (DoS) attacks
-- Third-party libraries and dependencies
-- Social engineering
+•	Full scope information includes: registration, login, account management, vault functionality, API endpoints, session management, and authentication mechanisms
+
+Scope Exclusions
+
+Per client request, TCMS did not perform any Denial of Service attacks during testing. Infrastructure and underlying OS, third-party libraries and dependencies, and social engineering were also excluded.
 
 ---
 
@@ -108,12 +120,11 @@ A comprehensive penetration test of the FailSafe Password Manager web applicatio
 
 ## Finding 1: SQL Injection - Registration Username Field
 
-**Severity:** HIGH (CVSS 8.6)  
-**Points:** 25  
+**Severity:** CRITICAL (CVSS 9.8)  
 **Status:** CONFIRMED
 
 ### Description
-The registration endpoint accepts unsanitized user input in the username field, allowing SQL injection attacks. An attacker can inject SQL commands to bypass authentication, create unauthorized accounts, or potentially extract database information.
+The registration endpoint accepts unsanitized user input in the username field, allowing SQL injection attacks. An attacker can inject SQL commands to bypass authentication, create unauthorized accounts, or potentially extract database information. This is a critical vulnerability as it requires no authentication and allows complete database compromise.
 
 ### Vulnerability Details
 - **Endpoint:** POST /register
@@ -143,8 +154,8 @@ curl -X POST http://10.0.0.10/register \
 - Combined with IDOR: Complete account takeover chain
 
 ### CVSS v3.1 Score
-**Score:** 8.6 (High)  
-**Vector:** CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:L/A:N
+**Score:** 9.8 (Critical)  
+**Vector:** CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H
 
 ### Remediation
 
@@ -204,7 +215,6 @@ Response: {"message":"Registration successful!","success":true}
 ## Finding 2: SQL Injection - Vault Add Title Field
 
 **Severity:** HIGH (CVSS 8.6)  
-**Points:** 25  
 **Status:** CONFIRMED
 
 ### Description
@@ -240,7 +250,7 @@ curl -X POST http://10.0.0.10/vault/add \
 
 ### CVSS v3.1 Score
 **Score:** 8.6 (High)  
-**Vector:** CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:C/C:H/I:L/A:N
+**Vector:** CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:N
 
 ### Remediation
 
@@ -297,8 +307,7 @@ Response: {"success":true,"message":"Item added successfully!"}
 
 ## Finding 3: Insecure Direct Object Reference (IDOR) - Vault Edit Endpoint
 
-**Severity:** HIGH (CVSS 8.8)  
-**Points:** 25  
+**Severity:** HIGH (CVSS 8.1)  
 **Status:** CONFIRMED
 
 ### Description
@@ -348,8 +357,8 @@ Item deleted successfully
 - Potential for account lockout or data destruction
 
 ### CVSS v3.1 Score
-**Score:** 8.8 (High)  
-**Vector:** CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H
+**Score:** 8.1 (High)  
+**Vector:** CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:L
 
 ### Remediation
 
@@ -424,8 +433,7 @@ Response: Item deleted successfully
 
 ## Finding 4: Broken Authentication - Session Fixation
 
-**Severity:** MEDIUM (CVSS 6.8)  
-**Points:** 25  
+**Severity:** MEDIUM (CVSS 5.4)  
 **Status:** CONFIRMED
 
 ### Description
@@ -464,8 +472,8 @@ curl http://10.0.0.10/vault \
 - Account compromise without credential theft
 
 ### CVSS v3.1 Score
-**Score:** 6.8 (Medium)  
-**Vector:** CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:U/C:H/I:H/A:N
+**Score:** 5.4 (Medium)  
+**Vector:** CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:L/I:L/A:N
 
 ### Remediation
 
@@ -540,7 +548,7 @@ Response: Returns vault page (vulnerable)
 
 ## Finding 5: Cross-Site Request Forgery (CSRF) - Account Update
 
-**Severity:** MEDIUM (CVSS 6.8)  
+**Severity:** MEDIUM (CVSS 4.3)  
 **Status:** CONFIRMED
 
 ### Description
@@ -571,8 +579,8 @@ The account update endpoint (`POST /account/update`) lacks CSRF protection. An a
 - Account takeover when combined with phishing
 
 ### CVSS v3.1 Score
-**Score:** 6.8 (Medium)  
-**Vector:** CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:U/C:H/I:N/A:N
+**Score:** 4.3 (Medium)  
+**Vector:** CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:N/I:L/A:N
 
 ### Remediation
 
@@ -637,7 +645,7 @@ The account update endpoint (`POST /account/update`) lacks CSRF protection. An a
 
 ## Finding 6: Rate Limit Headers Present but Not Enforced - Login & Vault Unlock Endpoints
 
-**Severity:** MEDIUM  
+**Severity:** HIGH (CVSS 7.5)  
 **Status:** CONFIRMED
 
 ### Description
@@ -672,6 +680,10 @@ X-RateLimit-Remaining: 45
 - Unlimited brute force attacks possible
 - Weak password accounts remain vulnerable
 - Rate limit headers provide false sense of security
+
+### CVSS v3.1 Score
+**Score:** 7.5 (High)  
+**Vector:** CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N
 
 ### Remediation
 
@@ -745,7 +757,7 @@ csrfhacked123           [Status: 200, Size: 43, Words: 2, Lines: 1, Duration: 12
 
 ## Finding 7: Weak Password Validation - No Complexity Enforcement on Password Change
 
-**Severity:** MEDIUM  
+**Severity:** HIGH (CVSS 7.5)  
 **Status:** CONFIRMED
 
 ### Description
@@ -807,8 +819,8 @@ curl -X POST http://10.0.0.10/account/update \
 - Inconsistent security controls between registration and password change
 
 ### CVSS v3.1 Score
-**Score:** 5.3 (Medium)  
-**Vector:** CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:N/I:L/A:N
+**Score:** 7.5 (High)  
+**Vector:** CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N
 
 ### Remediation
 
@@ -923,7 +935,7 @@ Response: {"success":true,"message":"Login successful."}
 
 ## Finding 8: Missing Security Headers
 
-**Severity:** MEDIUM  
+**Severity:** MEDIUM (CVSS 5.3)  
 **Status:** CONFIRMED
 
 ### Description
@@ -1009,7 +1021,7 @@ Cache-Control: no-cache
 
 ## Finding 9: Cleartext Password Submission
 
-**Severity:** MEDIUM  
+**Severity:** HIGH (CVSS 7.5)  
 **Status:** CONFIRMED
 
 ### Description
@@ -1056,7 +1068,7 @@ Content-Type: application/json
 
 ## Finding 10: Lack of Input Validation on Vault Items
 
-**Severity:** LOW  
+**Severity:** LOW (CVSS 3.1)  
 **Status:** CONFIRMED
 
 ### Description
@@ -1098,7 +1110,7 @@ curl -X POST http://10.0.0.10/vault/add \
 
 ## Finding 11: Information Disclosure - Error Messages
 
-**Severity:** MEDIUM  
+**Severity:** MEDIUM (CVSS 5.3)  
 **Status:** CONFIRMED
 
 ### Description
@@ -1319,24 +1331,146 @@ Remediation of all critical findings is essential before production deployment. 
 
 ---
 
-**Report Prepared By:** TCM Security, Inc.  
-**Date:** January 18, 2026  
-**Classification:** Business Confidential
+## Testing Methodology & Negative Findings
+
+During the penetration test, multiple potential vulnerabilities were tested but found not to be exploitable. This section documents the comprehensive testing methodology and demonstrates that security controls are effective against common attack vectors.
+
+### 1. Server-Side Template Injection (SSTI)
+
+**Description:** Attempted to inject template engine payloads to execute server-side code.
+
+**Tested Endpoints:**
+- POST /register (username field)
+- POST /vault/add (vaulttitle field)
+
+**Payloads Used:**
+- `{{7*7}}` (Handlebars/Pug)
+- `<%=7*7%>` (EJS)
+
+**Testing Method:**
+```bash
+curl -X POST http://10.0.0.10/register \
+  -H "Content-Type: application/json" \
+  -d '{"username":"{{7*7}}","password":"test123"}'
+```
+
+**Results:**
+- Payloads accepted as literal strings
+- No mathematical execution observed
+- Application properly sanitizes input and uses JSON responses without template rendering
+
+**Conclusion:** SSTI not vulnerable ✓
 
 ---
 
-## Screenshots Placeholder
+### 2. Server-Side Request Forgery (SSRF)
 
-[Screenshots to be added:]
-- SQL Injection successful account creation (registration)
-- SQL Injection successful vault item creation (vault add)
-- IDOR successful vault item modification (vault edit)
-- Session fixation PoC (old cookie access)
-- CSRF PoC HTML page
-- Rate limiting HTTP 429 response
-- Weak password acceptance
-- Missing security headers
-- Client-side error handling code
+**Description:** Attempted to make the application fetch external URLs.
+
+**Tested Endpoint:** GET /share/:key
+
+**Payloads Used:**
+- `http://127.0.0.1:80`
+- `http://attacker.com`
+
+**Testing Method:**
+```bash
+curl "http://10.0.0.10/share/http://127.0.0.1:80" \
+  -H "Cookie: [session]"
+```
+
+**Results:**
+- Response: "Cannot GET /share/http://127.0.0.1:80"
+- Application does not fetch external resources
+- Route does not accept URLs as parameters
+
+**Conclusion:** SSRF not vulnerable ✓
+
+---
+
+### 3. Authorization Bypass in Share Endpoint
+
+**Description:** Attempted to access shared vault items without proper authorization.
+
+**Tested Endpoint:** GET /share/:key
+
+**Testing Method:**
+- Access share links without authentication
+- Access with different user sessions
+- Test predictable share keys (1-10)
+
+**Results:**
+- Unauthenticated requests: HTTP 401 "Not authenticated"
+- Wrong user sessions: HTTP 401 "Not authenticated"
+- Predictable keys: All failed (no valid keys found)
+
+**Conclusion:** Authorization properly enforced ✓
+
+---
+
+### 4. File Upload Vulnerabilities
+
+**Description:** Searched for file upload functionality in the application.
+
+**Tested Areas:**
+- Vault add endpoint (POST /vault/add)
+- Account update (POST /account/update)
+- UI inspection for file input fields
+
+**Results:**
+- All endpoints use JSON with text fields only
+- No multipart/form-data requests
+- No file input elements in HTML forms
+- Application is password management only
+
+**Conclusion:** File upload not present - no vulnerabilities possible ✓
+
+---
+
+### 5. Stored XSS in Vault Display
+
+**Description:** Attempted stored XSS via vault item fields displayed in HTML.
+
+**Tested Areas:**
+- Vault item creation and display
+- Title, username, password fields
+
+**Payloads Used:**
+- `<script>alert("XSS")</script>` in title field
+
+**Testing Method:**
+```bash
+curl -X POST http://10.0.0.10/vault/add \
+  -H "Cookie: [session]" \
+  -H "Content-Type: application/json" \
+  -d '{"vaulttitle":"<script>alert(\"XSS\")</script>","vaultusername":"test","vaultpassword":"test"}'
+```
+
+**Results:**
+- Payload stored and displayed as plain text
+- No JavaScript execution
+- Application sanitizes HTML output on display
+
+**Conclusion:** Stored XSS not vulnerable ✓
+
+---
+
+### Summary of Negative Findings
+
+Multiple potential vulnerabilities were tested but found not exploitable:
+- **SSTI:** Sanitized input prevents template injection
+- **SSRF:** Share endpoint doesn't fetch external URLs
+- **Auth Bypass:** Proper authentication required for share
+- **File Upload:** No upload functionality exists
+- **Stored XSS:** Properly sanitized before display
+
+These negative findings demonstrate that security controls are effective against common attack vectors beyond the identified critical vulnerabilities.
+
+---
+
+**Report Prepared By:** TCM Security, Inc.  
+**Date:** January 18, 2026  
+**Classification:** Business Confidential
 
 ---
 
