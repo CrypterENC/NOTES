@@ -86,7 +86,7 @@ Step | Action | Recommendation
 3 | Leveraged IDOR vulnerability in vault edit/delete endpoints to access other users' data | Implement proper authorization checks and object-level access controls
 4 | Exploited Session Fixation vulnerability to maintain persistent unauthorized access | Invalidate and regenerate session cookies on authentication and implement secure session management
 5 | Performed CSRF attack on account update endpoint to force password changes | Implement CSRF tokens and validate requests to prevent cross-site request forgery
-6 | Bypassed weak rate limiting on login and vault unlock endpoints for brute force attacks | Implement proper rate limiting, account lockouts, and multi-factor authentication
+6 | Bypassed weak rate limiting on login and vault unlock endpoints for brute force attacks | Implement proper rate limiting, account lockouts, and multi-factor authentication,
 
 ---
 
@@ -859,7 +859,7 @@ curl -X POST http://10.0.0.10/account/update \
 
 **Recreation Steps:**
 
-**Scenario 1: Account Password - Different passwords (Rejected)**
+**Scenario 1: Account Password - Same weak password (Accepted)**
 1. Login to the application with valid credentials (e.g., password: csrfhacked123).
 2. Navigate to account settings.
 3. Use Burp Suite to intercept POST /account/update request.
