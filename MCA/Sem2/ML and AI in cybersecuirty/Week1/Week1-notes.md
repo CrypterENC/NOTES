@@ -436,3 +436,114 @@ hosuing = pd.DataFrame(california.data, columns = california.feature_names)
 # New way of pushing Data into DF using 'frame' --> as_frame=True.
 housing = california.frame
 ```
+
+- Look at the shape of data.
+
+```python
+housing.shape
+
+#OUTPUT:
+	(20640, 9)
+```
+
+- Show the **Tail** and **Head** of the table.
+
+```python
+housing.tail()   # Last 5
+housing.head()   # First 5
+```
+
+- Get the **MEAN** 
+
+```python
+#============================================================
+housing['AveRooms'].mean()  #Get mean for AveRooms Col
+
+#OUTPUT:
+	5.428999742190376
+#============================================================
+
+#============================================================	
+housing.mean(axis = 0)      #Get mean for each Col
+
+#OUTPUT:
+	MedInc            3.870671
+	HouseAge         28.639486
+	AveRooms          5.429000
+	AveBedrms         1.096675
+	Population     1425.476744
+	AveOccup          3.070655
+	Latitude         35.631861
+	Longitude      -119.569704
+	MedHouseVal       2.068558
+	dtype: float64
+#============================================================
+housing.mean(axis = 1)      #Get mean for each Row
+
+#OUTPUT:
+	0         33.562744
+	1        262.094029
+	2         54.061360
+	3         60.454940
+	4         61.045845
+	            ...    
+	20635     88.830077
+	20636     34.017826
+	20637    105.942697
+	20638     76.494316
+	20639    148.160729
+	Length: 20640, dtype: float64
+#============================================================
+```
+
+- Some **basic stats** on our numerical data
+
+```python
+housing.describe()
+```
+
+### Some Indexing
+
+```python
+housing[:3]  # gives first 3 rows of the dataset
+
+housing[3:11:2]  #rows 3 through 11, stepping by 2, note the start in inclusive and the end is excluded (like python)
+```
+
+- Now if we want Columns in pandas we use `.iloc`
+
+```python
+housing.iloc[:3,:2] # the first 3 rows and 2 columns -- note the comma ',' which used to tell pandas that we are indexing both rows and columns
+
+#OUTPUT
+	|    MedInc|HouseAge|
+	|---|------|--------|
+	|0  |8.3252|41.0    |
+	|1  |8.3014|21.0    |
+	|2  |7.2574|52.0    |
+
+# note we can do the same things we did before with `.iloc` as well
+housing.iloc[:2]
+
+#OUTPUT
+	|   MedInc|HouseAge|AveRooms|AveBedrms|Population|AveOccup|Latitude|Longitude|MedHouseVal|
+	|---|------|----|--------|-------|------|--------|-----|------- |-----|
+	|0  |8.3252|41.0|6.984127|1.02381|322.0 |2.555556|37.88|-122.23 |4.526|
+	|1  |8.3014|21.0|6.238137|0.97188|2401.0|2.109842|37.86|-122.22 |3.585|
+
+```
+
+- Now if we want Columns with there **string names** in pandas we use `.loc`
+
+```python
+housing.loc[:4, ['MedInc', 'HouseAge']]
+
+#OUTPUT
+	|    MedInc|HouseAge|
+	|---|------|--------|
+	|0  |8.3252|41.0    |
+	|1  |8.3014|21.0    |
+	|2  |7.2574|52.0    |
+	|3  |5.6431|52.0    |
+	|4  |3.8462|52.0    |
+```
