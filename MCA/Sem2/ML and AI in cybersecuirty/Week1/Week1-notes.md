@@ -1,7 +1,8 @@
-## 1.4 How do Computers Learn? 
+
+	## 1.4 How do Computers Learn? 
 > **What is Learning** : The acquisition of knowledge or skills **through study, experience or being taught.**
 
-### Deductive vs Inductive Learning
+	### Deductive vs Inductive Learning
 
 1. **Deductive Learning** : 
 	- You give the **Algorithms 2 Things**:
@@ -62,7 +63,7 @@ I will use this notebook as a base and demonstrate the basics of the libraries w
 
 ## NumPy🎦📜👩🏽‍💻
 - Numerical Python
-- The fundamental package for scientific computing
+	- The fundamental package for scientific computing
 - it gives as **ndarray** (n-dimensional array)
 
 ### Importing NumPy
