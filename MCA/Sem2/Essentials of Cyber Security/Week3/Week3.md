@@ -25,33 +25,53 @@
 - When a **user creates a file**, by **default they becomes the owner of the file**.
 ## Managing Users
 ### 1. USER CREATION
-| Command                                 | What It Does                                            |
-| --------------------------------------- | ------------------------------------------------------- |
-| `sudo useradd username`                 | Creates user with default settings                      |
-| `sudo useradd -m username`              | Creates user **with** home directory (`/home/username`) |
-| `sudo useradd -u 1500 username`         | Creates user with **specific UID**                      |
-| `sudo useradd -d /custom/home username` | Sets **custom home directory**                          |
-| `sudo su <username>`                    | Change to that user.                                    |
-### 2. PASSWORD MANAGEMENT
-| Command                      | What It Does                                             |     |
-| ---------------------------- | -------------------------------------------------------- | --- |
-| `sudo passwd username`       | Set or change user password                              |     |
-| `sudo passwd -d username`    | Delete password (user can login with **empty** password) |     |
-| `sudo passwd -l username`    | **Lock** the account (prefix `!` in `/etc/shadow`)       |     |
-| `sudo passwd -u username`    | **Unlock** the account                                   |     |
-| `sudo passwd -e username`    | Force password change on **next login**                  |     |
-| `sudo passwd -S username`    | Show password **status** (locked, last change, etc.)     |     |
-| `sudo passwd -n 7 username`  | Minimum **7 days** before password can be changed        |     |
-| `sudo passwd -x 90 username` | Password **expires** after 90 days                       |     |
-| `sudo passwd -w 7 username`  | Warn user **7 days** before expiry                       |     |
-| `sudo passwd -i 30 username` | Account **inactive** after 30 days of password expiry    |     |
-### 3. USER DELETION
 
-| Command                                                           | What It Does                                      |
-| ----------------------------------------------------------------- | ------------------------------------------------- |
-| `sudo userdel username`                                           | Deletes user account **but keeps** home directory |
-| `sudo userdel -r username` or `sudo deluser <name> --remove-home` | Deletes user **and** home directory + mail spool  |
-| `sudo userdel -f username`                                        | Force delete (even if user is logged in)          |
+|Command|What It Does|
+|---|---|
+|`sudo adduser username`|Creates user with **home dir**, **shell**, **password** (interactive)|
+|`sudo adduser --system username`|Creates **system user** (no home, no login)|
+|`sudo adduser --home /custom/dir username`|Creates user with **custom home directory**|
+|`sudo adduser --shell /bin/zsh username`|Creates user with **specific shell**|
+|`sudo adduser --uid 1500 username`|Creates user with **specific UID**|
+|`sudo useradd -m username`|Low-level alternative (no prompts, no password)|
+
+### 2. PASSWORD MANAGEMENT
+
+|Command|What It Does|
+|---|---|
+|`sudo passwd username`|Set or change user password|
+|`sudo passwd -d username`|Delete password (empty password – **insecure**)|
+|`sudo passwd -l username`|**Lock** the account|
+|`sudo passwd -u username`|**Unlock** the account|
+|`sudo passwd -e username`|Force password change on **next login**|
+|`sudo passwd -S username`|Show password **status**|
+|`sudo passwd -n 7 username`|Minimum **7 days** before password change|
+|`sudo passwd -x 90 username`|Password **expires** after 90 days|
+|`sudo passwd -w 7 username`|Warn user **7 days** before expiry|
+|`sudo passwd -i 30 username`|Account **inactive** after 30 days|
+
+### 3. USER DELETION (Debian/Ubuntu)
+
+|Command|What It Does|
+|---|---|
+|`sudo deluser username`|Deletes user **but keeps** home directory|
+|`sudo deluser --remove-home username`|Deletes user **and** home directory|
+|`sudo deluser --remove-all-files username`|Deletes user + home + mail spool + all files owned by user|
+|`sudo deluser --backup username`|Backs up home directory before deletion|
+|`sudo userdel -r username`|Alternative (lower-level) – deletes user + home|
+
+### 4. USER MODIFICATION (Debian/Ubuntu)
+
+| Command                               | What It Does                |
+| ------------------------------------- | --------------------------- |
+| `sudo usermod -l newname oldname`     | Change **username**         |
+| `sudo usermod -d /new/home username`  | Change **home directory**   |
+| `sudo usermod -s /bin/zsh username`   | Change **login shell**      |
+| `sudo usermod -u 2000 username`       | Change **UID**              |
+| `sudo usermod -g groupname username`  | Change **primary group**    |
+| `sudo usermod -L username`            | Lock account                |
+| `sudo usermod -U username`            | Unlock account              |
+| `sudo usermod -e 2025-12-31 username` | Set **account expiry date** |
 
 ## Groups
 - Users are grouped together into Groups.
@@ -61,16 +81,37 @@
 
 > **You successfully added `<user>` to the `<group>`, but you're not seeing it in `groups` output. Let me explain why.** **Groups are loaded at login** -- `su - <username>
 ## Managing Groups
-### 1. GROUP MANAGEMENT
-| Command                                                                | What It Does                                           |
-| ---------------------------------------------------------------------- | ------------------------------------------------------ |
-| `sudo groupadd groupname`                                              | Create a new group                                     |
-| `sudo groupdel groupname`                                              | Delete group                                           |
-| `sudo groupmod -n newname oldname`                                     | Rename group                                           |
-| `sudo groupmod -g 2500 groupname`                                      | Change GID                                             |
-| `sudo gpasswd -a username groupname`  or `sudo adduser <user> <group>` | Add user to group (**Debian/Ubuntu**)                  |
-| `sudo gpasswd -d username groupname`                                   | Remove user from group (**Universal**)                 |
-| `sudo deluser username groupname`                                      | Remove user from group (**Debian/Ubuntu** alternative) |
+### 1. GROUP CREATION & DELETION
+
+| Command                            | What It Does                                |
+| ---------------------------------- | ------------------------------------------- |
+| `sudo addgroup groupname`          | Create a new group (Debian/Ubuntu friendly) |
+| `sudo groupadd groupname`          | Create a new group (low-level)              |
+| `sudo delgroup groupname`          | Delete group (Debian/Ubuntu friendly)       |
+| `sudo groupdel groupname`          | Delete group (low-level)                    |
+| `sudo groupmod -n newname oldname` | Rename group                                |
+| `sudo groupmod -g 2500 groupname`  | Change GID                                  |
+
+### 2. ADD/REMOVE USERS TO/FROM GROUPS (Debian/Ubuntu)
+
+|Command|What It Does|
+|---|---|
+|`sudo adduser username groupname`|Add user to **secondary group**|
+|`sudo deluser username groupname`|Remove user from **secondary group**|
+|`sudo gpasswd -a username groupname`|Add user to group (alternative)|
+|`sudo gpasswd -d username groupname`|Remove user from group (alternative)|
+|`sudo usermod -aG groupname username`|Add user to group (standard, works everywhere)|
+
+### 3. VIEW GROUP INFO (Debian/Ubuntu)
+
+|Command|What It Does|
+|---|---|
+|`groups username`|Show all groups for a user|
+|`id username`|Show UID, GID, and all groups|
+|`getent group groupname`|Show group info (including members)|
+|`getent group \| grep username`|Find which groups a user belongs to|
+|`members groupname`|List all users in a group (if `members` installed)|
+|`sudo cat /etc/group \| grep groupname`|Directly view group entry|
 
 # File Permission
 
@@ -92,7 +133,7 @@
 
 ### Changing the File Permission
 
-|Method|Syntax|Example|
-|---|---|---|
-|**Symbolic**|`chmod u+rwx,g+rx,o-rwx file`|`chmod u+x script.sh`|
-|**Numeric (Octal)**|`chmod 755 file`|`chmod 644 file.txt`|
+| Method              | Syntax                                                       | Example               |
+| ------------------- | ------------------------------------------------------------ | --------------------- |
+| **Symbolic**        | `chmod u+rwx,g+rx,o-rwx file` or `chmod u=rwx,g=r,o=rw file` | `chmod u+x script.sh` |
+| **Numeric (Octal)** | `chmod 755 file`                                             | `chmod 644 file.txt`  |

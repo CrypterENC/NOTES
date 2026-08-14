@@ -1,6 +1,6 @@
 ## What is the Internet?
 
-> **The Internet is a global system of interconnected computer networks** that uses standardized protocols (TCP/IP) to communicate and share information.
+> **The Internet is a global system of interconnected computer networks** that uses **standardized protocols (TCP/IP)** to communicate and share **information**.
 
 ---
 
@@ -89,7 +89,7 @@
 ## Protocol Layering 
 ### What is Protocol Layering?
 
-> **Protocol layering** is the ~={green}**practice of dividing network communication**=~ ~={purple}into **stacked layers**, ~={yellow}where each **layer has a specific job** and only **communicates** with the **layers directly above and below it**=~.=~
+> **Protocol layering** is the ~={green}**practice of dividing network communication**=~ ~={purple}into **stacked layers**, ~={yellow}where each **layer has a specific job** and **~={red}only communicates=~** with the **layers directly above and below it**=~.=~
 
 ### The Benefits
 > Layering offers conceptual clarity and structural organization.
@@ -104,7 +104,7 @@ It consists of **5 layers**, each with specific responsibilities, from the physi
 - Moves **individual bits** (0s and 1s) from one node to another.
 - Defines **electrical, mechanical, and procedural** specifications.
 - Depends on the **transmission medium** (cable, fiber, radio).
-- Protocols are **link-dependent**.
+- Protocols are **link-dependent** ( protocols used at the Physical Layer ~={yellow}**depend entirely on the type of physical link**=~ (cable, fiber, wireless) being used to transmit data. )
 
 **Examples:**
 
