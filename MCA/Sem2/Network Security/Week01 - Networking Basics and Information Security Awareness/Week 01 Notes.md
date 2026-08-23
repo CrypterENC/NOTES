@@ -114,7 +114,7 @@ It consists of **5 layers**, each with specific responsibilities, from the physi
 - Connectors (RJ45, SC, LC)
 
 #### Layer 2: Link Layer (Data Link Layer)
-- Routes datagrams through routers via the **link layer**.
+- The Link Layer is responsible for transferring data between **two directly connected neighboring devices (node-to-node)** over a single physical link **(Link Layer)** (e.g., laptop to Wi-Fi router, or router to router).
 - Different link-layer protocols can handle a datagram at **different links** along the route.
 - Provides **framing**, **error detection**, and **MAC addressing**.
 - Each node along the route uses link-layer services.
@@ -126,7 +126,7 @@ It consists of **5 layers**, each with specific responsibilities, from the physi
 - PPP (Point-to-Point Protocol)
 
 #### Layer 3: Network Layer (IP Layer)
-- Moves **datagrams** between hosts.
+- While the Link Layer connects neighboring nodes, the Network Layer is responsible for **host-to-host delivery (end-to-end routing)** across different networks.
 - Receives transport-layer **segment** and **destination address**.
 - Provides **logical addressing** (IP addresses).
 - Handles **routing** (finding the best path).

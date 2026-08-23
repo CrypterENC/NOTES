@@ -60,14 +60,6 @@
 - It prevents the **~={green}receiver’s buffer from overflowing=~**, which ~={cyan}would cause packet loss and retransmissions.=~
 
 > **Key idea:** The receiver tells the sender how much data it can accept.
-## Receive Buffer
-## Receive Window
-## Mechanism of Flow Control
-## Concerns in Flow Control
-# 3.3
-# 3.4
-# 3.5
-# 3.6
 
 
 

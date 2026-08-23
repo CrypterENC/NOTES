@@ -207,8 +207,6 @@ Work Flow for E-MAIL
 - **Synchronizes emails**, **~={green}Keeps all emails on the server=~**, ~={cyan}allowing multiple devices to **view and manage** the same mailbox=~.
 - **Ports:** 143 (unencrypted), 993 (IMAPS/SSL)
 - Uses a Persistent TCP connection.
-## Web Based E-Mails
-
 # Week 2.4 DNS
 ## What is DNS ?
 - DNS (Domain Name System) it **~={yellow}translates human-readable domain names=~** (like `www.google.com`.
