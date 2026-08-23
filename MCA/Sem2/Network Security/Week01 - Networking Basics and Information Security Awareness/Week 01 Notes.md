@@ -140,7 +140,7 @@ It consists of **5 layers**, each with specific responsibilities, from the physi
 
 #### Layer 4: Transport Layer
 
-- Transports **application-layer messages** between hosts.
+- The Transport Layer provides **process-to-process delivery**, ensuring data gets directly to the specific running application (like Chrome or Spotify) rather than just reaching the computer.
 - Provides **end-to-end communication**.
 - Two main protocols: **TCP** and **UDP**.
 - Transport-layer packets are called **segments** (TCP) or **datagrams** (UDP).
@@ -156,7 +156,7 @@ It consists of **5 layers**, each with specific responsibilities, from the physi
 - ✅ Simple
 
 #### Layer 5: Application Layer
-- Hosts **network applications** and their protocols.
+- The Application Layer contains the **network protocols that user applications directly interact with** to send and receive data across the network.
 - Provides services directly to **end-users**.
 - Uses **ports** to identify specific applications.
 
